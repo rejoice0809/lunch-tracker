@@ -1693,7 +1693,7 @@ document.getElementById('distanceFilterMin').addEventListener('change', () => {
 });
 
 // ---- 룰렛 ----
-const ROULETTE_COLORS = ['#f2b705', '#e8472a', '#16273f', '#9fb2cc', '#b89c4a', '#5a2a22'];
+const ROULETTE_COLORS = ['#f2b705', '#0e1a2b'];
 const ROULETTE_TILT = 52;
 const ROULETTE_PERSPECTIVE = 900;
 function rouletteTransform(deg){
@@ -1740,16 +1740,20 @@ function drawRouletteWheel(pool){
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, r, start*Math.PI/180, end*Math.PI/180);
     ctx.closePath();
-    ctx.fillStyle = ROULETTE_COLORS[i % ROULETTE_COLORS.length];
+    const segColor = ROULETTE_COLORS[i % ROULETTE_COLORS.length];
+    ctx.fillStyle = segColor;
     ctx.fill();
+    ctx.strokeStyle = '#0e1a2b';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
-    // 라벨
+    // 라벨 (배경색에 따라 글자색 대비를 맞춤)
     const mid = (start+end)/2 * Math.PI/180;
     ctx.save();
     ctx.translate(cx + Math.cos(mid)*r*0.62, cy + Math.sin(mid)*r*0.62);
     ctx.rotate(mid + Math.PI/2);
-    ctx.fillStyle = '#0e1a2b';
-    ctx.font = 'bold 13px "Gowun Dodum", sans-serif';
+    ctx.fillStyle = (i % ROULETTE_COLORS.length === 0) ? '#0e1a2b' : '#f4ecd8';
+    ctx.font = 'bold 14px "Gowun Dodum", sans-serif';
     ctx.textAlign = 'center';
     const label = p.name.length > 6 ? p.name.slice(0,5)+'…' : p.name;
     ctx.fillText(label, 0, 0);
