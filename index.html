@@ -19,6 +19,15 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#0e1a2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="점심뭐먹지">
+
 <style>
   :root{
     --navy:#0e1a2b;
@@ -162,8 +171,8 @@
     font-size:13px;
   }
 
-  .game-tabs{display:flex;gap:8px;margin-bottom:14px;}
-  .game-tabs button{flex:1;background:#0b1626;color:#9fb2cc;border:1px solid var(--line);}
+  .game-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .game-tabs button{flex:1;min-width:84px;background:#0b1626;color:#9fb2cc;border:1px solid var(--line);font-size:13px;padding:9px 6px;}
   .game-tabs button.active{background:var(--brick);color:#fff;border-color:var(--brick);}
 
   .dice-stage{
@@ -199,6 +208,69 @@
 
   .ladder-wrap{overflow-x:auto;padding:10px 0;}
   .ladder-svg{display:block;margin:0 auto;}
+
+  /* 룰렛 */
+  .roulette-stage{text-align:center;padding:10px;}
+  .roulette-wrap{
+    position:relative;
+    width:300px;height:300px;
+    margin:0 auto 6px;
+  }
+  .roulette-wrap canvas{
+    width:100%;height:100%;
+    border-radius:50%;
+    box-shadow:0 6px 0 #0b1626, 0 0 0 6px var(--navy2), 0 0 0 9px var(--mustard);
+    transition:transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  }
+  .roulette-pointer{
+    position:absolute;
+    top:-8px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:34px;
+    color:var(--mustard);
+    text-shadow:0 2px 0 #0b1626;
+    z-index:2;
+    pointer-events:none;
+  }
+
+  /* 슬롯머신 */
+  .slot-stage{text-align:center;padding:10px;}
+  .slot-window{
+    width:260px;
+    height:180px;
+    margin:0 auto 18px;
+    overflow:hidden;
+    background:var(--cream);
+    border-radius:14px;
+    box-shadow:0 6px 0 #b89c4a, inset 0 0 0 6px var(--navy2);
+    position:relative;
+  }
+  .slot-window::before{
+    content:"";
+    position:absolute;
+    top:50%;left:0;right:0;
+    height:60px;
+    transform:translateY(-50%);
+    border-top:2px dashed var(--brick);
+    border-bottom:2px dashed var(--brick);
+    pointer-events:none;
+  }
+  .slot-reel{
+    display:flex;
+    flex-direction:column;
+    transition:transform 3.5s cubic-bezier(0.1, 0.7, 0.15, 1);
+  }
+  .slot-item{
+    height:60px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Black Han Sans',sans-serif;
+    font-size:18px;
+    color:var(--navy);
+    padding:0 10px;
+    text-align:center;
+    box-sizing:border-box;
+  }
 
   .stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
   .stat-card{
@@ -517,6 +589,8 @@
     <div class="section-title"><span class="num">03</span> 오늘의 추첨</div>
     <div class="game-tabs">
       <button id="tabDice" class="active">🎲 주사위</button>
+      <button id="tabRoulette">🎡 룰렛</button>
+      <button id="tabSlot">🎰 슬롯</button>
       <button id="tabLadder">🪜 사다리타기</button>
       <button id="tabVote">🗳 투표</button>
     </div>
@@ -548,6 +622,31 @@
       </div>
       <div class="result-banner" id="ladderResult" style="text-align:center;"></div>
       <div id="ladderDirections" style="text-align:center;margin-top:10px;"></div>
+    </div>
+
+    <div id="rouletteView" style="display:none;">
+      <div class="roulette-stage">
+        <div class="roulette-wrap" id="rouletteWrap">
+          <canvas id="rouletteCanvas" width="300" height="300"></canvas>
+          <div class="roulette-pointer">▼</div>
+        </div>
+        <button class="btn-primary" id="spinRouletteBtn">룰렛 돌리기</button>
+        <div class="result-banner" id="rouletteResult"></div>
+        <div class="sub-banner" id="rouletteSub"></div>
+        <div id="rouletteDirections" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div id="slotView" style="display:none;">
+      <div class="slot-stage">
+        <div class="slot-window" id="slotWindow">
+          <div class="slot-reel" id="slotReel"></div>
+        </div>
+        <button class="btn-primary" id="spinSlotBtn">슬롯 당기기</button>
+        <div class="result-banner" id="slotResult"></div>
+        <div class="sub-banner" id="slotSub"></div>
+        <div id="slotDirections" style="margin-top:10px;"></div>
+      </div>
     </div>
 
     <div id="voteView" style="display:none;">
@@ -1460,23 +1559,24 @@ function getEligiblePlaces(){
 }
 
 // ---- 추천 가중치: 오래 안 간 곳일수록, 평점이 높을수록 가중치 ↑, 방문 기록 없으면 최우선 ----
+function calcWeight(p){
+  let base;
+  const lv = lastVisitDate(p);
+  if(!lv){
+    base = 5; // 한번도 안 간 곳 우대
+  } else {
+    const days = Math.max(0, (Date.now() - new Date(lv).getTime()) / 86400000);
+    base = 1 + Math.min(days, 30) / 5; // 최대 가중치 제한
+  }
+  const avg = avgRating(p);
+  const ratingFactor = avg !== null ? avg / 3 : 1; // 평점이 높을수록 약간 더 우대
+  return base * ratingFactor;
+}
+
 function weightedPick(pool){
   const list = pool || places;
   if(list.length === 0) return null;
-  const now = Date.now();
-  const weights = list.map(p => {
-    let base;
-    const lv = lastVisitDate(p);
-    if(!lv){
-      base = 5; // 한번도 안 간 곳 우대
-    } else {
-      const days = Math.max(0, (now - new Date(lv).getTime()) / 86400000);
-      base = 1 + Math.min(days, 30) / 5; // 최대 가중치 제한
-    }
-    const avg = avgRating(p);
-    const ratingFactor = avg !== null ? avg / 3 : 1; // 평점이 높을수록 약간 더 우대
-    return base * ratingFactor;
-  });
+  const weights = list.map(calcWeight);
   const total = weights.reduce((a,b)=>a+b,0);
   let r = Math.random() * total;
   for(let i=0;i<list.length;i++){
@@ -1526,11 +1626,15 @@ document.getElementById('rollDiceBtn').addEventListener('click', () => {
 // ---- 탭 전환 ----
 const tabButtons = {
   dice: document.getElementById('tabDice'),
+  roulette: document.getElementById('tabRoulette'),
+  slot: document.getElementById('tabSlot'),
   ladder: document.getElementById('tabLadder'),
   vote: document.getElementById('tabVote')
 };
 const tabViews = {
   dice: document.getElementById('diceView'),
+  roulette: document.getElementById('rouletteView'),
+  slot: document.getElementById('slotView'),
   ladder: document.getElementById('ladderView'),
   vote: document.getElementById('voteView')
 };
@@ -1539,12 +1643,16 @@ function switchTab(name){
     tabButtons[k].classList.toggle('active', k === name);
     tabViews[k].style.display = (k === name) ? '' : 'none';
   });
-  // 거리 필터는 주사위/사다리에서만 의미가 있음
+  // 거리 필터는 주사위/룰렛/슬롯/사다리에서만 의미가 있음
   document.getElementById('distanceFilterRow').style.display = (name === 'vote') ? 'none' : 'flex';
   if(name === 'ladder') drawLadder();
   if(name === 'vote') renderVoteCandidates();
+  if(name === 'roulette') resetRoulette();
+  if(name === 'slot') resetSlot();
 }
 tabButtons.dice.addEventListener('click', () => switchTab('dice'));
+tabButtons.roulette.addEventListener('click', () => switchTab('roulette'));
+tabButtons.slot.addEventListener('click', () => switchTab('slot'));
 tabButtons.ladder.addEventListener('click', () => switchTab('ladder'));
 tabButtons.vote.addEventListener('click', () => switchTab('vote'));
 
@@ -1553,6 +1661,171 @@ document.getElementById('distanceFilterChk').addEventListener('change', () => {
 });
 document.getElementById('distanceFilterMin').addEventListener('change', () => {
   if(document.getElementById('ladderView').style.display !== 'none') drawLadder();
+});
+
+// ---- 룰렛 ----
+const ROULETTE_COLORS = ['#f2b705', '#e8472a', '#16273f', '#9fb2cc', '#b89c4a', '#5a2a22'];
+let rouletteSegments = null; // [{place, start, end}]
+let rouletteRotation = 0;
+let rouletteSpinning = false;
+
+function resetRoulette(){
+  document.getElementById('rouletteResult').textContent = '';
+  document.getElementById('rouletteSub').textContent = '';
+  renderDirectionsButton('rouletteDirections', null);
+  const { pool, excludedCount, fallback } = getEligiblePlaces();
+  if(pool.length === 0){
+    document.getElementById('rouletteSub').textContent = '추첨할 단골집이 없어요.';
+    rouletteSegments = null;
+    const ctx = document.getElementById('rouletteCanvas').getContext('2d');
+    ctx.clearRect(0,0,300,300);
+    return;
+  }
+  drawRouletteWheel(pool);
+  let note = '';
+  if(fallback && excludedCount > 0) note = '조건에 맞는 곳이 없어 전체에서 추첨해요';
+  else if(excludedCount > 0) note = `최근 방문/거리 조건으로 ${excludedCount}곳은 제외됐어요`;
+  document.getElementById('rouletteSub').textContent = note;
+}
+
+function drawRouletteWheel(pool){
+  const canvas = document.getElementById('rouletteCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 150, cy = 150, r = 148;
+  const weights = pool.map(calcWeight);
+  const total = weights.reduce((a,b)=>a+b,0);
+
+  ctx.clearRect(0,0,300,300);
+  let angle = -90; // 12시 방향부터 시작 (도 단위)
+  const segs = [];
+  pool.forEach((p, i) => {
+    const sweep = (weights[i]/total) * 360;
+    const start = angle;
+    const end = angle + sweep;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start*Math.PI/180, end*Math.PI/180);
+    ctx.closePath();
+    ctx.fillStyle = ROULETTE_COLORS[i % ROULETTE_COLORS.length];
+    ctx.fill();
+
+    // 라벨
+    const mid = (start+end)/2 * Math.PI/180;
+    ctx.save();
+    ctx.translate(cx + Math.cos(mid)*r*0.62, cy + Math.sin(mid)*r*0.62);
+    ctx.rotate(mid + Math.PI/2);
+    ctx.fillStyle = '#0e1a2b';
+    ctx.font = 'bold 13px "Gowun Dodum", sans-serif';
+    ctx.textAlign = 'center';
+    const label = p.name.length > 6 ? p.name.slice(0,5)+'…' : p.name;
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+
+    segs.push({ place: p, start, end });
+    angle = end;
+  });
+
+  rouletteSegments = segs;
+}
+
+document.getElementById('spinRouletteBtn').addEventListener('click', () => {
+  if(rouletteSpinning || !rouletteSegments || rouletteSegments.length === 0){
+    if(!rouletteSegments || rouletteSegments.length === 0) resetRoulette();
+    return;
+  }
+  rouletteSpinning = true;
+  document.getElementById('rouletteResult').textContent = '';
+  renderDirectionsButton('rouletteDirections', null);
+
+  // 세그먼트 면적(=가중치) 비례로 당첨 칸 선택
+  const totalSweep = rouletteSegments.reduce((a,s) => a + (s.end - s.start), 0);
+  let r = Math.random() * totalSweep;
+  let winnerSeg = rouletteSegments[rouletteSegments.length-1];
+  for(const seg of rouletteSegments){
+    const sweep = seg.end - seg.start;
+    if(r <= sweep){ winnerSeg = seg; break; }
+    r -= sweep;
+  }
+  const winnerMid = (winnerSeg.start + winnerSeg.end) / 2;
+
+  // 포인터는 12시(-90도) 고정. 휠을 돌려서 winnerMid가 -90도에 오도록.
+  const extraSpins = 5 + Math.floor(Math.random()*3); // 5~7바퀴
+  const targetRotation = rouletteRotation - (rouletteRotation % 360) + extraSpins*360 + (-90 - winnerMid);
+  rouletteRotation = targetRotation;
+
+  const wrap = document.getElementById('rouletteWrap');
+  wrap.querySelector('canvas').style.transform = `rotate(${rouletteRotation}deg)`;
+
+  setTimeout(() => {
+    rouletteSpinning = false;
+    const picked = winnerSeg.place;
+    document.getElementById('rouletteResult').textContent = `오늘의 점심: ${picked.name}`;
+    document.getElementById('rouletteSub').textContent = picked.visits.length
+      ? `최근 방문: ${fmtDate(lastVisitDate(picked))}`
+      : '한 번도 안 가본 곳이에요!';
+    renderDirectionsButton('rouletteDirections', picked);
+  }, 4050);
+});
+
+// ---- 슬롯머신 ----
+let slotSpinning = false;
+let slotOffset = 0;
+
+function resetSlot(){
+  document.getElementById('slotResult').textContent = '';
+  document.getElementById('slotSub').textContent = '';
+  renderDirectionsButton('slotDirections', null);
+  const reel = document.getElementById('slotReel');
+  reel.style.transition = 'none';
+  reel.style.transform = 'translateY(0)';
+  slotOffset = 0;
+  const { pool } = getEligiblePlaces();
+  reel.innerHTML = pool.length
+    ? pool.slice(0,1).map(p => `<div class="slot-item">${escapeHtml(p.name)}</div>`).join('')
+    : '<div class="slot-item">단골집을 등록해주세요</div>';
+}
+
+document.getElementById('spinSlotBtn').addEventListener('click', () => {
+  if(slotSpinning) return;
+  const { pool, excludedCount, fallback } = getEligiblePlaces();
+  if(pool.length === 0){
+    document.getElementById('slotSub').textContent = '추첨할 단골집이 없어요.';
+    return;
+  }
+  slotSpinning = true;
+  document.getElementById('slotResult').textContent = '';
+  document.getElementById('slotSub').textContent = '';
+  renderDirectionsButton('slotDirections', null);
+
+  const picked = weightedPick(pool);
+  const ITEM_H = 60;
+  const REEL_LEN = 24; // 마지막 칸이 당첨 칸
+  const reelItems = [];
+  for(let i=0;i<REEL_LEN-1;i++){
+    reelItems.push(pool[Math.floor(Math.random()*pool.length)]);
+  }
+  reelItems.push(picked);
+
+  const reel = document.getElementById('slotReel');
+  reel.style.transition = 'none';
+  reel.style.transform = 'translateY(0)';
+  reel.innerHTML = reelItems.map(p => `<div class="slot-item">${escapeHtml(p.name)}</div>`).join('');
+
+  // 강제 리플로우 후 애니메이션 시작 (창 가운데 줄에 당첨 칸이 오도록)
+  void reel.offsetHeight;
+  const targetY = -(((REEL_LEN-1) * ITEM_H) - ITEM_H); // 윈도우 높이 180 = 3칸, 가운데 줄에 위치
+  reel.style.transition = '';
+  reel.style.transform = `translateY(${targetY}px)`;
+
+  setTimeout(() => {
+    slotSpinning = false;
+    document.getElementById('slotResult').textContent = `오늘의 점심: ${picked.name}`;
+    let sub = picked.visits.length ? `최근 방문: ${fmtDate(lastVisitDate(picked))}` : '한 번도 안 가본 곳이에요!';
+    if(fallback && excludedCount > 0) sub += ' · 조건에 맞는 곳이 없어 전체에서 추첨했어요';
+    else if(excludedCount > 0) sub += ` · 최근 방문/거리 조건으로 ${excludedCount}곳은 제외됐어요`;
+    document.getElementById('slotSub').textContent = sub;
+    renderDirectionsButton('slotDirections', picked);
+  }, 3550);
 });
 
 // ---- 사다리타기 ----
@@ -1783,6 +2056,12 @@ document.getElementById('resetVoteBtn').addEventListener('click', () => {
 });
 
 load();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => { /* 무시: SW 없이도 앱은 정상 동작 */ });
+  });
+}
 </script>
 </body>
 </html>
