@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 점심 식권</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0e1a2b;
+    --navy2:#16273f;
+    --mustard:#f2b705;
+    --brick:#e8472a;
+    --cream:#f4ecd8;
+    --line:#2c4364;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--navy);
+    background-image:
+      radial-gradient(circle at 10% 0%, #18304f 0%, transparent 45%),
+      radial-gradient(circle at 90% 100%, #18304f 0%, transparent 45%);
+    color:var(--cream);
+    font-family:'Gowun Dodum', sans-serif;
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+  header{text-align:center;margin-bottom:28px;}
+  header .eyebrow{
+    font-family:'Space Mono',monospace;
+    letter-spacing:.2em;
+    font-size:12px;
+    color:var(--mustard);
+    margin-bottom:4px;
+  }
+  h1{
+    font-family:'Black Han Sans',sans-serif;
+    font-size:38px;
+    margin:0;
+    color:var(--cream);
+    text-shadow:3px 3px 0 var(--brick);
+  }
+  .ticket-edge{
+    position:relative;
+    background:var(--navy2);
+    border:2px dashed var(--line);
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:22px;
+  }
+  .ticket-edge::before, .ticket-edge::after{
+    content:"";
+    position:absolute;
+    width:18px;height:18px;
+    background:var(--navy);
+    border-radius:50%;
+    top:50%;
+    transform:translateY(-50%);
+  }
+  .ticket-edge::before{left:-11px;}
+  .ticket-edge::after{right:-11px;}
+
+  .section-title{
+    font-family:'Black Han Sans',sans-serif;
+    color:var(--mustard);
+    font-size:18px;
+    margin:0 0 12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-title .num{
+    font-family:'Space Mono',monospace;
+    background:var(--brick);
+    color:#fff;
+    font-size:12px;
+    padding:2px 7px;
+    border-radius:4px;
+  }
+
+  form.add-form{display:flex;flex-wrap:wrap;gap:8px;}
+  input, select{
+    font-family:'Gowun Dodum',sans-serif;
+    background:#0b1626;
+    border:1px solid var(--line);
+    color:var(--cream);
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:14px;
+  }
+  input[name=name]{flex:2;min-width:120px;}
+  input[name=memo]{flex:2;min-width:120px;}
+  select{flex:1;min-width:100px;}
+  button{
+    font-family:'Gowun Dodum',sans-serif;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    padding:10px 16px;
+    font-size:14px;
+    font-weight:bold;
+  }
+  .btn-primary{background:var(--mustard);color:var(--navy);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--cream);}
+  .btn-ghost:hover{border-color:var(--mustard);color:var(--mustard);}
+  .btn-danger{background:transparent;color:#e8472a;border:1px solid #5a2a22;}
+
+  .place-list{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .place{
+    background:#0b1626;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .place .info{flex:1;min-width:160px;}
+  .place .name{font-size:16px;font-weight:bold;color:var(--cream);}
+  .place .name .tag{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--mustard);
+    border:1px solid var(--mustard);
+    padding:1px 6px;
+    border-radius:10px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  .place .meta{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#9fb2cc;
+    margin-top:4px;
+  }
+  .place .memo{font-size:12px;color:#cdb;opacity:.8;margin-top:2px;}
+  .place .actions{display:flex;gap:6px;}
+  .place .actions button{padding:7px 10px;font-size:12px;}
+
+  .empty{
+    text-align:center;
+    padding:30px 10px;
+    color:#7e93b3;
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+  }
+
+  .game-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .game-tabs button{flex:1;background:#0b1626;color:#9fb2cc;border:1px solid var(--line);}
+  .game-tabs button.active{background:var(--brick);color:#fff;border-color:var(--brick);}
+
+  .dice-stage{
+    text-align:center;
+    padding:20px 10px;
+  }
+  .dice-box{
+    width:80px;height:80px;
+    margin:0 auto 16px;
+    background:var(--cream);
+    color:var(--navy);
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Black Han Sans',sans-serif;
+    font-size:34px;
+    box-shadow:0 6px 0 #b89c4a;
+    transition:transform .1s;
+  }
+  .dice-box.rolling{animation:shake .15s infinite;}
+  @keyframes shake{
+    0%{transform:rotate(-8deg);}
+    50%{transform:rotate(8deg);}
+    100%{transform:rotate(-8deg);}
+  }
+  .result-banner{
+    margin-top:14px;
+    font-family:'Black Han Sans',sans-serif;
+    font-size:24px;
+    color:var(--mustard);
+    min-height:34px;
+  }
+  .sub-banner{font-size:13px;color:#9fb2cc;font-family:'Space Mono',monospace;}
+
+  .ladder-wrap{overflow-x:auto;padding:10px 0;}
+  .ladder-svg{display:block;margin:0 auto;}
+
+  .stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+  .stat-card{
+    flex:1;min-width:120px;
+    background:#0b1626;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+  }
+  .stat-card .label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#9fb2cc;
+    margin-bottom:6px;
+  }
+  .stat-card .value{
+    font-family:'Black Han Sans',sans-serif;
+    font-size:22px;
+    color:var(--mustard);
+  }
+  .stat-card .value small{
+    font-family:'Gowun Dodum',sans-serif;
+    font-size:12px;
+    color:var(--cream);
+    display:block;
+    margin-top:2px;
+  }
+
+  .bar-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:9px;
+  }
+  .bar-row .bar-label{
+    width:96px;
+    flex-shrink:0;
+    font-size:12px;
+    color:var(--cream);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bar-row .bar-track{
+    flex:1;
+    background:#0b1626;
+    border-radius:6px;
+    height:14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .bar-row .bar-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--brick), var(--mustard));
+    border-radius:6px 0 0 6px;
+  }
+  .bar-row .bar-count{
+    width:34px;
+    flex-shrink:0;
+    text-align:right;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:#9fb2cc;
+  }
+
+  .stat-subtitle{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:var(--mustard);
+    margin:18px 0 10px;
+  }
+
+  .rank-list{display:flex;flex-direction:column;gap:6px;}
+  .rank-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#0b1626;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:13px;
+  }
+  .rank-row .rk{
+    font-family:'Space Mono',monospace;
+    color:var(--brick);
+    font-weight:bold;
+    margin-right:8px;
+  }
+  .rank-row .rk-meta{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#9fb2cc;
+  }
+
+  /* 거리/평점 chip */
+  .place .chip-row{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
+  .chip{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--cream);
+    background:#16273f;
+    border:1px solid var(--line);
+    padding:2px 8px;
+    border-radius:10px;
+  }
+  .chip.stars{color:var(--mustard);border-color:#5a4a1a;}
+
+  input[name=distance]{flex:1;min-width:90px;}
+  input[name=address]{flex:2;min-width:160px;}
+
+  /* 정렬 컨트롤 */
+  .list-controls{
+    display:flex;justify-content:flex-end;align-items:center;gap:8px;
+    margin-bottom:10px;flex-wrap:wrap;
+  }
+  .list-controls select{font-size:12px;padding:6px 8px;}
+  .list-controls button{font-size:12px;padding:6px 10px;}
+
+  /* 별점 모달 */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(8,14,24,.7);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-box{
+    background:var(--navy2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:24px 20px;
+    max-width:320px;
+    width:100%;
+    text-align:center;
+  }
+  .modal-box h3{
+    font-family:'Black Han Sans',sans-serif;
+    color:var(--cream);
+    margin:0 0 6px;
+    font-size:18px;
+  }
+  .modal-box p{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:#9fb2cc;
+    margin:0 0 16px;
+  }
+  .star-picker{display:flex;justify-content:center;gap:6px;margin-bottom:18px;}
+  .star-picker button{
+    background:none;border:none;font-size:30px;cursor:pointer;
+    color:#3a4d6b;padding:2px;
+    transition:transform .1s;
+  }
+  .star-picker button.on{color:var(--mustard);}
+  .star-picker button:hover{transform:scale(1.15);}
+  .modal-actions{display:flex;gap:8px;justify-content:center;}
+  .date-field{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-bottom:14px;
+  }
+  .date-field label{
+    font-family:'Space Mono',monospace;font-size:12px;color:#9fb2cc;
+  }
+  .date-field input[type=date]{
+    font-family:'Space Mono',monospace;font-size:13px;
+    color-scheme:dark;
+  }
+
+  /* 투표 모드 */
+  .vote-setup{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .vote-candidates{
+    display:flex;flex-wrap:wrap;gap:8px;
+    max-height:180px;overflow-y:auto;
+    padding:10px;
+    background:#0b1626;border:1px solid var(--line);border-radius:10px;
+  }
+  .vote-check{
+    display:flex;align-items:center;gap:6px;
+    background:var(--navy2);border:1px solid var(--line);
+    border-radius:16px;padding:5px 10px;font-size:13px;cursor:pointer;
+  }
+  .vote-check input{accent-color:var(--mustard);}
+  .vote-board{display:flex;flex-direction:column;gap:8px;}
+  .vote-item{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#0b1626;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;
+  }
+  .vote-item .vname{font-size:14px;}
+  .vote-item .vcount{
+    font-family:'Space Mono',monospace;color:var(--mustard);
+    font-size:13px;margin-right:8px;
+  }
+  .vote-item .vbar{
+    flex:1;height:8px;background:#16273f;border-radius:4px;margin:0 10px;
+    overflow:hidden;
+  }
+  .vote-item .vbar-fill{height:100%;background:linear-gradient(90deg,var(--brick),var(--mustard));}
+  .vote-actions{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+
+  /* 방문 이력 모달 */
+  .history-modal-box{max-width:380px;text-align:left;}
+  .history-list{
+    max-height:280px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:6px;
+    margin-bottom:14px;
+  }
+  .history-row{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#0b1626;border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;gap:8px;
+  }
+  .history-row .h-date{
+    font-family:'Space Mono',monospace;font-size:11px;color:var(--cream);
+  }
+  .history-row .h-rating{font-size:12px;color:var(--mustard);}
+  .history-row .h-actions{display:flex;gap:6px;}
+  .history-row .h-actions button{
+    padding:4px 8px;font-size:11px;
+  }
+  .history-empty{
+    text-align:center;color:#7e93b3;font-family:'Space Mono',monospace;
+    font-size:12px;padding:20px 0;
+  }
+
+  /* 단골집 정보 수정 모달 */
+  .edit-modal-box{max-width:380px;text-align:left;}
+  .edit-form{display:flex;flex-direction:column;gap:12px;}
+  .edit-form label{
+    display:flex;flex-direction:column;gap:5px;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#9fb2cc;
+  }
+  .edit-form input, .edit-form select{
+    font-family:'Gowun Dodum',sans-serif;
+    width:100%;
+  }
+  .edit-hint{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#7e93b3;
+    margin:-2px 0 0;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:30px;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:#5d7191;
+  }
+  footer .credit{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--mustard);
+    letter-spacing:.03em;
+  }
+
+  @media (max-width:480px){
+    h1{font-size:28px;}
+    .dice-box{width:64px;height:64px;font-size:26px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">NO.0809 · LUNCH TICKET</div>
+    <h1>오늘 뭐 먹지?</h1>
+  </header>
+
+  <div class="ticket-edge">
+    <div class="section-title"><span class="num">01</span> 단골집 등록</div>
+    <form class="add-form" id="addForm">
+      <input name="name" placeholder="가게 이름" required>
+      <select name="category">
+        <option value="한식">한식</option>
+        <option value="중식">중식</option>
+        <option value="일식">일식</option>
+        <option value="양식">양식</option>
+        <option value="분식">분식</option>
+        <option value="패스트푸드">패스트푸드</option>
+        <option value="카페">카페</option>
+        <option value="기타">기타</option>
+      </select>
+      <input name="memo" placeholder="메모 (예: 점심특선 9천원)">
+      <input name="distance" type="number" min="0" placeholder="도보(분)">
+      <input name="address" placeholder="도로명 주소 (선택)">
+      <button type="submit" class="btn-primary">+ 추가</button>
+    </form>
+  </div>
+
+  <div class="ticket-edge">
+    <div class="section-title"><span class="num">02</span> 단골집 목록 <span id="countTag" style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:#9fb2cc;"></span></div>
+    <div class="list-controls">
+      <button class="btn-ghost" id="exportBtn" type="button">⬆ 내보내기</button>
+      <button class="btn-ghost" id="importBtn" type="button">⬇ 가져오기</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none;">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;color:#9fb2cc;">정렬</span>
+      <select id="sortSelect">
+        <option value="default">기본순</option>
+        <option value="distance">거리순 (가까운)</option>
+        <option value="rating">평점순 (높은)</option>
+        <option value="visits">방문 많은순</option>
+        <option value="stale">오래 안 간순</option>
+      </select>
+    </div>
+    <div class="place-list" id="placeList"></div>
+  </div>
+
+  <div class="ticket-edge">
+    <div class="section-title"><span class="num">03</span> 오늘의 추첨</div>
+    <div class="game-tabs">
+      <button id="tabDice" class="active">🎲 주사위</button>
+      <button id="tabLadder">🪜 사다리타기</button>
+      <button id="tabVote">🗳 투표</button>
+    </div>
+
+    <div id="distanceFilterRow" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;font-size:12px;">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="distanceFilterChk" style="accent-color:var(--mustard);">
+        🚶 가까운 곳만
+      </label>
+      <input type="number" id="distanceFilterMin" value="15" min="1" style="width:60px;padding:6px 8px;font-size:12px;"> 분 이내
+    </div>
+
+    <div id="diceView">
+      <div class="dice-stage">
+        <div class="dice-box" id="diceBox">🍚</div>
+        <button class="btn-primary" id="rollDiceBtn">주사위 굴리기</button>
+        <div class="result-banner" id="diceResult"></div>
+        <div class="sub-banner" id="diceSub"></div>
+        <div id="diceDirections" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div id="ladderView" style="display:none;">
+      <div style="text-align:center;margin-bottom:10px;">
+        <button class="btn-primary" id="runLadderBtn">사다리 시작</button>
+      </div>
+      <div class="ladder-wrap">
+        <svg id="ladderSvg" class="ladder-svg"></svg>
+      </div>
+      <div class="result-banner" id="ladderResult" style="text-align:center;"></div>
+      <div id="ladderDirections" style="text-align:center;margin-top:10px;"></div>
+    </div>
+
+    <div id="voteView" style="display:none;">
+      <div class="vote-setup" id="voteSetup">
+        <div style="font-family:'Space Mono',monospace;font-size:12px;color:#9fb2cc;">투표 후보를 골라주세요 (2곳 이상)</div>
+        <div class="vote-candidates" id="voteCandidates"></div>
+        <div style="text-align:center;">
+          <button class="btn-primary" id="startVoteBtn">투표 시작</button>
+        </div>
+      </div>
+      <div id="voteBoardWrap" style="display:none;">
+        <div class="vote-board" id="voteBoard"></div>
+        <div class="result-banner" id="voteResult" style="text-align:center;"></div>
+        <div id="voteDirections" style="text-align:center;margin-top:6px;"></div>
+        <div class="vote-actions">
+          <button class="btn-ghost" id="endVoteBtn">투표 마감</button>
+          <button class="btn-danger" id="resetVoteBtn">다시 설정</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket-edge">
+    <div class="section-title"><span class="num">04</span> 통계</div>
+    <div class="stat-cards" id="statCards"></div>
+    <div class="stat-subtitle">📊 카테고리별 등록 비율</div>
+    <div class="rank-list" id="categoryBars"></div>
+    <div class="stat-subtitle">🏆 방문 횟수 랭킹</div>
+    <div class="rank-list" id="visitRanking"></div>
+    <div class="stat-subtitle">⏳ 오래 안 간 곳 TOP</div>
+    <div class="rank-list" id="staleRanking"></div>
+    <div class="stat-subtitle">⭐ 평점 랭킹</div>
+    <div class="rank-list" id="ratingRanking"></div>
+    <div class="stat-subtitle">🚶 가까운 곳 TOP</div>
+    <div class="rank-list" id="distanceRanking"></div>
+  </div>
+
+  <footer>
+    마지막 방문일 기준으로 오래 안 간 곳에 더 높은 확률을 줍니다 · 데이터는 이 브라우저(계정)에 저장됩니다
+    <div class="credit">Made with ❤️ by J.S. Jeong</div>
+  </footer>
+</div>
+
+<div class="modal-overlay" id="ratingModal" style="display:none;">
+  <div class="modal-box">
+    <h3 id="ratingModalTitle">오늘 식사 어땠나요?</h3>
+    <div class="date-field">
+      <label for="visitDateInput">방문 날짜</label>
+      <input type="date" id="visitDateInput">
+    </div>
+    <p>별점을 남기면 추천 정확도가 올라가요 (선택)</p>
+    <div class="star-picker" id="starPicker">
+      <button data-v="1">★</button>
+      <button data-v="2">★</button>
+      <button data-v="3">★</button>
+      <button data-v="4">★</button>
+      <button data-v="5">★</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="skipRatingBtn">평점 없이 저장</button>
+      <button class="btn-primary" id="confirmRatingBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="historyModal" style="display:none;">
+  <div class="modal-box history-modal-box">
+    <h3 id="historyModalTitle">방문 이력</h3>
+    <p>잘못 누른 방문은 삭제하거나 별점을 고칠 수 있어요</p>
+    <div class="history-list" id="historyList"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" id="closeHistoryBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModal" style="display:none;">
+  <div class="modal-box edit-modal-box">
+    <h3>단골집 정보 수정</h3>
+    <form id="editForm" class="edit-form">
+      <label>가게 이름
+        <input name="name" required>
+      </label>
+      <label>카테고리
+        <select name="category">
+          <option value="한식">한식</option>
+          <option value="중식">중식</option>
+          <option value="일식">일식</option>
+          <option value="양식">양식</option>
+          <option value="분식">분식</option>
+          <option value="패스트푸드">패스트푸드</option>
+          <option value="카페">카페</option>
+          <option value="기타">기타</option>
+        </select>
+      </label>
+      <label>메모
+        <input name="memo" placeholder="예: 점심특선 9천원">
+      </label>
+      <label>도보 거리(분)
+        <input name="distance" type="number" min="0" placeholder="예: 10">
+      </label>
+      <label>도로명 주소
+        <input name="address" placeholder="예: 서울 강남구 테헤란로 123">
+      </label>
+      <p class="edit-hint">주소를 바꾸면 길찾기용 좌표는 다음 길찾기 때 새로 계산돼요</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="cancelEditBtn">취소</button>
+        <button type="submit" class="btn-primary">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = 'lunch_places';
+let places = [];
+const hasCloudStorage = (typeof window.storage !== 'undefined' && window.storage !== null);
+
+function uid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
+
+async function loadRaw(){
+  if(hasCloudStorage){
+    try{
+      const res = await window.storage.get(STORE_KEY, false);
+      if(res) return res.value;
+    }catch(e){ /* 키가 없거나 실패 → 아래에서 localStorage로 폴백 */ }
+  }
+  try{
+    return localStorage.getItem(STORE_KEY);
+  }catch(e){
+    return null;
+  }
+}
+
+async function saveRaw(json){
+  let ok = false;
+  if(hasCloudStorage){
+    try{
+      await window.storage.set(STORE_KEY, json, false);
+      ok = true;
+    }catch(e){ console.error('클라우드 저장 실패', e); }
+  }
+  try{
+    localStorage.setItem(STORE_KEY, json);
+    ok = true;
+  }catch(e){ console.error('로컬 저장 실패', e); }
+  return ok;
+}
+
+async function load(){
+  try{
+    const raw = await loadRaw();
+    places = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    places = [];
+  }
+  // 마이그레이션: 옛 데이터(visits가 문자열 배열)를 {date,rating} 형태로, distance 필드 보강
+  let migrated = false;
+  places.forEach(p => {
+    if(p.distance === undefined){ p.distance = null; migrated = true; }
+    if(p.lat === undefined){ p.lat = null; migrated = true; }
+    if(p.lng === undefined){ p.lng = null; migrated = true; }
+    if(p.address === undefined){ p.address = null; migrated = true; }
+    p.visits = (p.visits || []).map(v => {
+      if(typeof v === 'string'){ migrated = true; return { date: v, rating: null }; }
+      return v;
+    });
+  });
+  render();
+  if(migrated) save();
+}
+
+async function save(){
+  try{
+    await saveRaw(JSON.stringify(places));
+  }catch(e){
+    console.error('저장 실패', e);
+  }
+}
+
+function fmtDate(iso){
+  if(!iso) return '방문 기록 없음';
+  const d = new Date(iso);
+  const today = new Date();
+  const diffDays = Math.floor((today - d) / 86400000);
+  const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  if(diffDays <= 0) return `${dateStr} (오늘)`;
+  return `${dateStr} (${diffDays}일 전)`;
+}
+
+// ---- 방문 기록 helper (visits = [{date, rating}]) ----
+function lastVisit(p){
+  return p.visits.length ? p.visits[p.visits.length-1] : null;
+}
+function lastVisitDate(p){
+  const v = lastVisit(p);
+  return v ? v.date : null;
+}
+function avgRating(p){
+  const rated = p.visits.filter(v => typeof v.rating === 'number');
+  if(rated.length === 0) return null;
+  return rated.reduce((s,v) => s + v.rating, 0) / rated.length;
+}
+function starsText(avg){
+  if(avg === null) return '';
+  return '⭐'.repeat(Math.round(avg)) + ` ${avg.toFixed(1)}`;
+}
+
+let currentSort = 'default';
+
+function sortedPlaces(){
+  const arr = [...places];
+  switch(currentSort){
+    case 'distance':
+      return arr.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    case 'rating':
+      return arr.sort((a,b) => (avgRating(b) ?? -1) - (avgRating(a) ?? -1));
+    case 'visits':
+      return arr.sort((a,b) => b.visits.length - a.visits.length);
+    case 'stale': {
+      const now = Date.now();
+      const score = p => {
+        const lv = lastVisitDate(p);
+        return lv ? new Date(lv).getTime() : -Infinity; // 방문 기록 없으면 최우선(가장 오래된 것으로 취급)
+      };
+      return arr.sort((a,b) => score(a) - score(b));
+    }
+    default:
+      return arr;
+  }
+}
+
+function render(){
+  const list = document.getElementById('placeList');
+  document.getElementById('countTag').textContent = places.length ? `${places.length}곳` : '';
+  if(places.length === 0){
+    list.innerHTML = '<div class="empty">아직 등록된 단골집이 없어요.<br>위에서 첫 가게를 추가해보세요 🍜</div>';
+    renderStats();
+    renderVoteCandidates();
+    return;
+  }
+  const ordered = sortedPlaces();
+  list.innerHTML = ordered.map(p => {
+    const lv = lastVisitDate(p);
+    const avg = avgRating(p);
+    return `
+    <div class="place" data-id="${p.id}">
+      <div class="info">
+        <div class="name">${escapeHtml(p.name)} <span class="tag">${escapeHtml(p.category)}</span></div>
+        <div class="meta">방문 ${p.visits.length}회 · 최근: ${fmtDate(lv)}</div>
+        <div class="chip-row">
+          ${p.distance != null ? `<span class="chip">🚶 도보 ${p.distance}분</span>` : ''}
+          ${avg !== null ? `<span class="chip stars">${starsText(avg)}</span>` : ''}
+          ${p.address ? `<span class="chip">📍 ${escapeHtml(p.address)}</span>` : ''}
+        </div>
+        ${p.memo ? `<div class="memo">📝 ${escapeHtml(p.memo)}</div>` : ''}
+      </div>
+      <div class="actions">
+        <button class="btn-ghost" data-action="visit">방문 기록 추가</button>
+        <button class="btn-ghost" data-action="directions">🗺 길찾기</button>
+        <button class="btn-ghost" data-action="edit">✏️ 수정</button>
+        <button class="btn-ghost" data-action="history">이력</button>
+        <button class="btn-danger" data-action="delete">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+  renderStats();
+  renderVoteCandidates();
+}
+
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  render();
+});
+
+// ---- 데이터 내보내기 / 가져오기 (버전이 바뀐 파일로 데이터 이어가기용) ----
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if(places.length === 0){
+    alert('내보낼 데이터가 없어요. 먼저 단골집을 등록해주세요!');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(places, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  a.href = url;
+  a.download = `lunch-tracker-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    let imported;
+    try{
+      imported = JSON.parse(reader.result);
+    }catch(err){
+      alert('파일을 읽을 수 없어요. 올바른 백업(.json) 파일인지 확인해주세요.');
+      e.target.value = '';
+      return;
+    }
+    if(!Array.isArray(imported)){
+      alert('올바른 백업 파일 형식이 아니에요.');
+      e.target.value = '';
+      return;
+    }
+    // 마이그레이션 + 보강
+    imported.forEach(p => {
+      if(!p.id) p.id = uid();
+      if(p.distance === undefined) p.distance = null;
+      if(p.lat === undefined) p.lat = null;
+      if(p.lng === undefined) p.lng = null;
+      if(p.address === undefined) p.address = null;
+      p.visits = (p.visits || []).map(v => typeof v === 'string' ? { date: v, rating: null } : v);
+    });
+
+    const hasExisting = places.length > 0;
+    let mode = 'merge';
+    if(hasExisting){
+      mode = confirm(
+        `현재 ${places.length}곳이 등록되어 있어요.\n\n` +
+        `확인 = 가져온 데이터와 합치기 (이름이 같은 곳은 방문기록만 병합)\n` +
+        `취소 = 가져온 데이터로 완전히 덮어쓰기`
+      ) ? 'merge' : 'replace';
+    }
+
+    if(mode === 'replace'){
+      places = imported;
+    } else {
+      imported.forEach(ip => {
+        const existing = places.find(p => p.name === ip.name && p.category === ip.category);
+        if(existing){
+          const seen = new Set(existing.visits.map(v => v.date));
+          ip.visits.forEach(v => {
+            if(!seen.has(v.date)){ existing.visits.push(v); seen.add(v.date); }
+          });
+          sortVisits(existing);
+          if((existing.distance === null || existing.distance === undefined) && ip.distance != null){
+            existing.distance = ip.distance;
+          }
+          if(!existing.memo && ip.memo) existing.memo = ip.memo;
+        } else {
+          places.push({ ...ip, id: uid() });
+        }
+      });
+    }
+
+    render();
+    await save();
+    alert(`${imported.length}곳의 데이터를 가져왔어요!`);
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+function renderStats(){
+  const cardsEl = document.getElementById('statCards');
+  const catEl = document.getElementById('categoryBars');
+  const visitRankEl = document.getElementById('visitRanking');
+  const staleRankEl = document.getElementById('staleRanking');
+  const ratingRankEl = document.getElementById('ratingRanking');
+  const distanceRankEl = document.getElementById('distanceRanking');
+
+  if(places.length === 0){
+    cardsEl.innerHTML = '<div class="empty">아직 통계를 보여줄 데이터가 없어요.</div>';
+    catEl.innerHTML = '';
+    visitRankEl.innerHTML = '';
+    staleRankEl.innerHTML = '';
+    ratingRankEl.innerHTML = '';
+    distanceRankEl.innerHTML = '';
+    return;
+  }
+
+  const totalPlaces = places.length;
+  const totalVisits = places.reduce((sum,p) => sum + p.visits.length, 0);
+  const mostVisited = [...places].sort((a,b) => b.visits.length - a.visits.length)[0];
+  const avgVisits = (totalVisits / totalPlaces).toFixed(1);
+
+  cardsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="label">등록된 단골집</div>
+      <div class="value">${totalPlaces}<small>곳</small></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">총 방문 횟수</div>
+      <div class="value">${totalVisits}<small>회</small></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">가게당 평균 방문</div>
+      <div class="value">${avgVisits}<small>회</small></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">최다 방문</div>
+      <div class="value" style="font-size:16px;">${mostVisited.visits.length > 0 ? escapeHtml(mostVisited.name) : '-'}<small>${mostVisited.visits.length}회</small></div>
+    </div>
+  `;
+
+  // 카테고리별 분포
+  const catCount = {};
+  places.forEach(p => { catCount[p.category] = (catCount[p.category]||0) + 1; });
+  const maxCat = Math.max(...Object.values(catCount));
+  catEl.innerHTML = Object.entries(catCount)
+    .sort((a,b) => b[1]-a[1])
+    .map(([cat,count]) => `
+      <div class="bar-row">
+        <div class="bar-label">${escapeHtml(cat)}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(count/maxCat*100)}%"></div></div>
+        <div class="bar-count">${count}곳</div>
+      </div>
+    `).join('');
+
+  // 방문 횟수 랭킹 (상위 5)
+  const visitRanked = [...places].sort((a,b) => b.visits.length - a.visits.length).slice(0,5);
+  visitRankEl.innerHTML = visitRanked.map((p,i) => `
+    <div class="rank-row">
+      <div><span class="rk">${i+1}</span>${escapeHtml(p.name)}</div>
+      <div class="rk-meta">${p.visits.length}회</div>
+    </div>
+  `).join('');
+
+  // 오래 안 간 곳 랭킹 (방문 기록 있는 곳 중 마지막 방문이 오래된 순, 상위 5)
+  const now = Date.now();
+  const staleRanked = places
+    .filter(p => p.visits.length > 0)
+    .map(p => ({p, lastVisitMs: new Date(lastVisitDate(p)).getTime()}))
+    .sort((a,b) => a.lastVisitMs - b.lastVisitMs)
+    .slice(0,5);
+  if(staleRanked.length === 0){
+    staleRankEl.innerHTML = '<div class="empty">아직 방문 기록이 없어요.</div>';
+  } else {
+    staleRankEl.innerHTML = staleRanked.map(({p,lastVisitMs},i) => {
+      const days = Math.floor((now - lastVisitMs)/86400000);
+      return `
+      <div class="rank-row">
+        <div><span class="rk">${i+1}</span>${escapeHtml(p.name)}</div>
+        <div class="rk-meta">${days}일 전</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 평점 랭킹 (상위 5, 평점 등록된 곳만)
+  const ratingRanked = places
+    .map(p => ({p, avg: avgRating(p)}))
+    .filter(x => x.avg !== null)
+    .sort((a,b) => b.avg - a.avg)
+    .slice(0,5);
+  if(ratingRanked.length === 0){
+    ratingRankEl.innerHTML = '<div class="empty">아직 등록된 평점이 없어요.</div>';
+  } else {
+    ratingRankEl.innerHTML = ratingRanked.map(({p,avg},i) => `
+      <div class="rank-row">
+        <div><span class="rk">${i+1}</span>${escapeHtml(p.name)}</div>
+        <div class="rk-meta">${starsText(avg)}</div>
+      </div>
+    `).join('');
+  }
+
+  // 거리 랭킹 (상위 5, 거리 등록된 곳만)
+  const distanceRanked = places
+    .filter(p => p.distance != null)
+    .sort((a,b) => a.distance - b.distance)
+    .slice(0,5);
+  if(distanceRanked.length === 0){
+    distanceRankEl.innerHTML = '<div class="empty">아직 등록된 거리 정보가 없어요.</div>';
+  } else {
+    distanceRankEl.innerHTML = distanceRanked.map((p,i) => `
+      <div class="rank-row">
+        <div><span class="rk">${i+1}</span>${escapeHtml(p.name)}</div>
+        <div class="rk-meta">도보 ${p.distance}분</div>
+      </div>
+    `).join('');
+  }
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const name = fd.get('name').trim();
+  if(!name) return;
+  const distanceRaw = fd.get('distance');
+  const distance = distanceRaw && distanceRaw.trim() !== '' ? Number(distanceRaw) : null;
+  const address = fd.get('address').trim() || null;
+  places.push({
+    id: uid(),
+    name,
+    category: fd.get('category'),
+    memo: fd.get('memo').trim(),
+    distance: (distance != null && !isNaN(distance)) ? distance : null,
+    lat: null,
+    lng: null,
+    address,
+    visits: []
+  });
+  e.target.reset();
+  render();
+  await save();
+});
+
+document.getElementById('placeList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const card = e.target.closest('.place');
+  const id = card.dataset.id;
+  const place = places.find(p => p.id === id);
+  if(!place) return;
+
+  if(btn.dataset.action === 'visit'){
+    openRatingModal(id);
+  } else if(btn.dataset.action === 'directions'){
+    openNaverDirections(place);
+  } else if(btn.dataset.action === 'edit'){
+    openEditModal(id);
+  } else if(btn.dataset.action === 'history'){
+    openHistoryModal(id);
+  } else if(btn.dataset.action === 'delete'){
+    if(confirm(`'${place.name}'을 목록에서 삭제할까요?`)){
+      places = places.filter(p => p.id !== id);
+      render();
+      await save();
+    }
+  }
+});
+
+// ---- 단골집 정보 수정 모달 ----
+let editingPlaceId = null;
+
+function openEditModal(placeId){
+  const place = places.find(p => p.id === placeId);
+  if(!place) return;
+  editingPlaceId = placeId;
+  const form = document.getElementById('editForm');
+  form.elements['name'].value = place.name;
+  form.elements['category'].value = place.category;
+  form.elements['memo'].value = place.memo || '';
+  form.elements['distance'].value = place.distance != null ? place.distance : '';
+  form.elements['address'].value = place.address || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal(){
+  document.getElementById('editModal').style.display = 'none';
+  editingPlaceId = null;
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if(!editingPlaceId) return;
+  const place = places.find(p => p.id === editingPlaceId);
+  if(!place) return;
+  const fd = new FormData(e.target);
+  const name = fd.get('name').trim();
+  if(!name){ alert('가게 이름을 입력해주세요.'); return; }
+  const distanceRaw = fd.get('distance');
+  const distance = (distanceRaw && distanceRaw.trim() !== '') ? Number(distanceRaw) : null;
+  const newAddress = fd.get('address').trim() || null;
+
+  place.name = name;
+  place.category = fd.get('category');
+  place.memo = fd.get('memo').trim();
+  place.distance = (distance != null && !isNaN(distance)) ? distance : null;
+  if(newAddress !== place.address){
+    // 주소가 바뀌면 캐시해둔 좌표는 무효화 (다음 길찾기 때 새로 계산)
+    place.lat = null;
+    place.lng = null;
+  }
+  place.address = newAddress;
+
+  closeEditModal();
+  render();
+  await save();
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+document.getElementById('editModal').addEventListener('click', (e) => {
+  if(e.target.id === 'editModal') closeEditModal();
+});
+
+// 주소 → 좌표 변환 (OpenStreetMap Nominatim, 무료/키 불필요)
+async function geocodeAddress(address){
+  const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=kr&limit=1&q=${encodeURIComponent(address)}`;
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if(!res.ok) throw new Error('geocode failed');
+  const data = await res.json();
+  if(!data || data.length === 0) throw new Error('no results');
+  return { lat: Number(data[0].lat), lng: Number(data[0].lon) };
+}
+
+// ---- 네이버 길찾기 연결 ----
+async function openNaverDirections(place){
+  const fallbackUrl = `https://map.naver.com/p/search/${encodeURIComponent(place.name)}`;
+
+  function goWithCoords(lat, lng){
+    // 좌표가 있으면 네이버지도 앱의 도보 길찾기를 바로 열고,
+    // 앱이 없는 PC/웹 환경에서는 잠시 후 웹 검색 결과로 대체 이동
+    const appUrl = `nmap://route/walk?dlat=${lat}&dlng=${lng}&dname=${encodeURIComponent(place.name)}&appname=lunchtracker`;
+    const fallbackTimer = setTimeout(() => {
+      window.location.href = fallbackUrl;
+    }, 1200);
+    window.addEventListener('pagehide', () => clearTimeout(fallbackTimer), { once: true });
+    window.location.href = appUrl;
+  }
+
+  if(place.lat != null && place.lng != null){
+    goWithCoords(place.lat, place.lng);
+    return;
+  }
+
+  if(place.address){
+    try{
+      const { lat, lng } = await geocodeAddress(place.address);
+      place.lat = lat;
+      place.lng = lng;
+      await save(); // 좌표 캐싱: 다음부턴 바로 길찾기로 이동
+      goWithCoords(lat, lng);
+    }catch(e){
+      alert('주소로 위치를 찾지 못했어요. 주소를 다시 확인해주세요. 이름으로 검색할게요.');
+      window.open(fallbackUrl, '_blank', 'noopener');
+    }
+    return;
+  }
+
+  // 주소도 좌표도 없으면 가게 이름으로 네이버 지도 검색을 열어, 거기서 길찾기를 누르도록 연결
+  window.open(fallbackUrl, '_blank', 'noopener');
+}
+
+function renderDirectionsButton(containerId, place){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!place){ el.innerHTML = ''; return; }
+  el.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'btn-ghost';
+  btn.style.fontSize = '12px';
+  btn.style.padding = '6px 12px';
+  btn.textContent = `🗺 ${place.name} 길찾기`;
+  btn.addEventListener('click', () => openNaverDirections(place));
+  el.appendChild(btn);
+}
+
+// ---- 방문 시 별점 모달 (새 방문 추가 / 기존 방문 별점 수정 겸용) ----
+let pendingVisitPlaceId = null;
+let pendingRatingValue = 0;
+let pendingEditIndex = null; // null이면 새 방문 추가, 숫자면 해당 인덱스의 visit 수정
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function dateStrOf(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// 선택한 날짜(YYYY-MM-DD)를 ISO 문자열로 변환. 오늘 날짜면 실제 현재 시간을 쓰고,
+// 과거/미래 날짜면 정오 시각을 기준으로 저장 (시간 정보가 없는 캘린더 입력이라서)
+function buildVisitDate(dateStr, fallbackIso){
+  if(!dateStr) return fallbackIso || new Date().toISOString();
+  if(dateStr === todayStr()) return new Date().toISOString();
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m-1, d, 12, 0, 0).toISOString();
+}
+
+function sortVisits(place){
+  place.visits.sort((a,b) => new Date(a.date) - new Date(b.date));
+}
+
+function openRatingModal(placeId){
+  pendingVisitPlaceId = placeId;
+  pendingEditIndex = null;
+  pendingRatingValue = 0;
+  const place = places.find(p => p.id === placeId);
+  document.getElementById('ratingModalTitle').textContent = place ? `${place.name}, 어땠나요?` : '식사 어땠나요?';
+  document.getElementById('visitDateInput').value = todayStr();
+  document.getElementById('visitDateInput').max = todayStr();
+  document.querySelectorAll('#starPicker button').forEach(b => b.classList.remove('on'));
+  document.getElementById('ratingModal').style.display = 'flex';
+}
+
+function openEditRatingModal(placeId, visitIndex){
+  pendingVisitPlaceId = placeId;
+  pendingEditIndex = visitIndex;
+  const place = places.find(p => p.id === placeId);
+  const visit = place ? place.visits[visitIndex] : null;
+  pendingRatingValue = (visit && visit.rating) || 0;
+  document.getElementById('ratingModalTitle').textContent = place ? `${place.name}, 방문 수정` : '방문 수정';
+  document.getElementById('visitDateInput').value = visit ? dateStrOf(visit.date) : todayStr();
+  document.getElementById('visitDateInput').max = todayStr();
+  document.querySelectorAll('#starPicker button').forEach(b => {
+    b.classList.toggle('on', Number(b.dataset.v) <= pendingRatingValue);
+  });
+  document.getElementById('ratingModal').style.display = 'flex';
+}
+
+function closeRatingModal(){
+  document.getElementById('ratingModal').style.display = 'none';
+  pendingVisitPlaceId = null;
+  pendingEditIndex = null;
+}
+
+async function recordVisit(placeId, rating, dateStr){
+  const place = places.find(p => p.id === placeId);
+  if(!place) return;
+  place.visits.push({ date: buildVisitDate(dateStr), rating: rating ?? null });
+  sortVisits(place);
+  render();
+  await save();
+}
+
+async function updateVisitRating(placeId, visitIndex, rating, dateStr){
+  const place = places.find(p => p.id === placeId);
+  if(!place || !place.visits[visitIndex]) return;
+  const visit = place.visits[visitIndex];
+  visit.rating = rating ?? null;
+  visit.date = buildVisitDate(dateStr, visit.date);
+  sortVisits(place);
+  render();
+  await save();
+  if(document.getElementById('historyModal').style.display !== 'none'){
+    renderHistoryList(placeId);
+  }
+}
+
+document.getElementById('starPicker').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if(!b) return;
+  pendingRatingValue = Number(b.dataset.v);
+  document.querySelectorAll('#starPicker button').forEach(btn => {
+    btn.classList.toggle('on', Number(btn.dataset.v) <= pendingRatingValue);
+  });
+});
+
+document.getElementById('confirmRatingBtn').addEventListener('click', async () => {
+  if(!pendingVisitPlaceId) return;
+  const rating = pendingRatingValue > 0 ? pendingRatingValue : null;
+  const dateStr = document.getElementById('visitDateInput').value;
+  if(pendingEditIndex !== null){
+    await updateVisitRating(pendingVisitPlaceId, pendingEditIndex, rating, dateStr);
+  } else {
+    await recordVisit(pendingVisitPlaceId, rating, dateStr);
+  }
+  closeRatingModal();
+});
+
+document.getElementById('skipRatingBtn').addEventListener('click', async () => {
+  if(!pendingVisitPlaceId) return;
+  const dateStr = document.getElementById('visitDateInput').value;
+  if(pendingEditIndex !== null){
+    await updateVisitRating(pendingVisitPlaceId, pendingEditIndex, null, dateStr);
+  } else {
+    await recordVisit(pendingVisitPlaceId, null, dateStr);
+  }
+  closeRatingModal();
+});
+
+// ---- 방문 이력 관리 모달 ----
+let activeHistoryPlaceId = null;
+
+function fmtHistoryDate(iso){
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function openHistoryModal(placeId){
+  activeHistoryPlaceId = placeId;
+  const place = places.find(p => p.id === placeId);
+  document.getElementById('historyModalTitle').textContent = place ? `${place.name} · 방문 이력` : '방문 이력';
+  renderHistoryList(placeId);
+  document.getElementById('historyModal').style.display = 'flex';
+}
+
+function closeHistoryModal(){
+  document.getElementById('historyModal').style.display = 'none';
+  activeHistoryPlaceId = null;
+}
+
+function renderHistoryList(placeId){
+  const listEl = document.getElementById('historyList');
+  const place = places.find(p => p.id === placeId);
+  if(!place || place.visits.length === 0){
+    listEl.innerHTML = '<div class="history-empty">아직 방문 기록이 없어요.</div>';
+    return;
+  }
+  // 최근 방문이 위로 오도록 역순 표시 (실제 인덱스는 data-idx로 보존)
+  const rows = place.visits.map((v, idx) => ({ v, idx })).reverse();
+  listEl.innerHTML = rows.map(({v, idx}) => `
+    <div class="history-row" data-idx="${idx}">
+      <div>
+        <div class="h-date">${fmtHistoryDate(v.date)}</div>
+        <div class="h-rating">${v.rating ? '⭐'.repeat(v.rating) : '평점 없음'}</div>
+      </div>
+      <div class="h-actions">
+        <button class="btn-ghost" data-history-action="edit">별점 수정</button>
+        <button class="btn-danger" data-history-action="delete">삭제</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('historyList').addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-history-action]');
+  if(!btn || !activeHistoryPlaceId) return;
+  const row = e.target.closest('.history-row');
+  const idx = Number(row.dataset.idx);
+  const place = places.find(p => p.id === activeHistoryPlaceId);
+  if(!place) return;
+
+  if(btn.dataset.historyAction === 'delete'){
+    if(confirm('이 방문 기록을 삭제할까요? 실수로 누른 방문을 되돌릴 때 사용하세요.')){
+      place.visits.splice(idx, 1);
+      render();
+      await save();
+      renderHistoryList(activeHistoryPlaceId);
+    }
+  } else if(btn.dataset.historyAction === 'edit'){
+    openEditRatingModal(activeHistoryPlaceId, idx);
+  }
+});
+
+document.getElementById('closeHistoryBtn').addEventListener('click', closeHistoryModal);
+document.getElementById('historyModal').addEventListener('click', (e) => {
+  if(e.target.id === 'historyModal') closeHistoryModal();
+});
+
+// ---- 최근 N일 이내 방문 여부 체크 ----
+const EXCLUDE_DAYS = 3;
+function visitedRecently(p, days = EXCLUDE_DAYS){
+  const lv = lastVisitDate(p);
+  if(!lv) return false;
+  const diffDays = (Date.now() - new Date(lv).getTime()) / 86400000;
+  return diffDays < days;
+}
+
+function getDistanceFilter(){
+  const chk = document.getElementById('distanceFilterChk');
+  const minInput = document.getElementById('distanceFilterMin');
+  if(!chk || !chk.checked) return null;
+  const max = Number(minInput.value) || 15;
+  return max;
+}
+
+function getEligiblePlaces(){
+  let base = places;
+  const maxDistance = getDistanceFilter();
+  let distanceExcluded = 0;
+  if(maxDistance != null){
+    const distanceFiltered = base.filter(p => p.distance != null && p.distance <= maxDistance);
+    distanceExcluded = base.length - distanceFiltered.length;
+    base = distanceFiltered.length > 0 ? distanceFiltered : base; // 후보가 없으면 거리 필터는 무시
+    if(distanceFiltered.length === 0) distanceExcluded = 0;
+  }
+  const eligible = base.filter(p => !visitedRecently(p));
+  const recentExcluded = base.length - eligible.length;
+  const excludedCount = distanceExcluded + recentExcluded;
+  if(eligible.length > 0){
+    return { pool: eligible, excludedCount, fallback: false };
+  }
+  // 모든 곳이 최근 3일 내 방문이라면 어쩔 수 없이 전체 풀(거리 필터는 유지)로 추첨
+  return { pool: base, excludedCount: distanceExcluded, fallback: true };
+}
+
+// ---- 추천 가중치: 오래 안 간 곳일수록, 평점이 높을수록 가중치 ↑, 방문 기록 없으면 최우선 ----
+function weightedPick(pool){
+  const list = pool || places;
+  if(list.length === 0) return null;
+  const now = Date.now();
+  const weights = list.map(p => {
+    let base;
+    const lv = lastVisitDate(p);
+    if(!lv){
+      base = 5; // 한번도 안 간 곳 우대
+    } else {
+      const days = Math.max(0, (now - new Date(lv).getTime()) / 86400000);
+      base = 1 + Math.min(days, 30) / 5; // 최대 가중치 제한
+    }
+    const avg = avgRating(p);
+    const ratingFactor = avg !== null ? avg / 3 : 1; // 평점이 높을수록 약간 더 우대
+    return base * ratingFactor;
+  });
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random() * total;
+  for(let i=0;i<list.length;i++){
+    r -= weights[i];
+    if(r <= 0) return list[i];
+  }
+  return list[list.length-1];
+}
+
+// ---- 주사위 게임 ----
+const diceFaces = ['🍚','🍜','🍱','🍕','🍣','🥪'];
+document.getElementById('rollDiceBtn').addEventListener('click', () => {
+  if(places.length === 0){
+    document.getElementById('diceResult').textContent = '먼저 단골집을 등록해주세요!';
+    return;
+  }
+  const { pool, excludedCount, fallback } = getEligiblePlaces();
+  const box = document.getElementById('diceBox');
+  const resultEl = document.getElementById('diceResult');
+  const subEl = document.getElementById('diceSub');
+  resultEl.textContent = '';
+  subEl.textContent = '';
+  renderDirectionsButton('diceDirections', null);
+  box.classList.add('rolling');
+  let i = 0;
+  const spin = setInterval(() => {
+    box.textContent = diceFaces[i % diceFaces.length];
+    i++;
+  }, 80);
+  setTimeout(() => {
+    clearInterval(spin);
+    box.classList.remove('rolling');
+    const picked = weightedPick(pool);
+    box.textContent = '🎯';
+    resultEl.textContent = `오늘의 점심: ${picked.name}`;
+    let sub = picked.visits.length ? `최근 방문: ${fmtDate(lastVisitDate(picked))}` : '한 번도 안 가본 곳이에요!';
+    if(fallback && excludedCount > 0){
+      sub += ` · 조건에 맞는 곳이 없어 전체에서 추첨했어요`;
+    } else if(excludedCount > 0){
+      sub += ` · 최근 방문/거리 조건으로 ${excludedCount}곳은 제외됐어요`;
+    }
+    subEl.textContent = sub;
+    renderDirectionsButton('diceDirections', picked);
+  }, 1100);
+});
+
+// ---- 탭 전환 ----
+const tabButtons = {
+  dice: document.getElementById('tabDice'),
+  ladder: document.getElementById('tabLadder'),
+  vote: document.getElementById('tabVote')
+};
+const tabViews = {
+  dice: document.getElementById('diceView'),
+  ladder: document.getElementById('ladderView'),
+  vote: document.getElementById('voteView')
+};
+function switchTab(name){
+  Object.keys(tabButtons).forEach(k => {
+    tabButtons[k].classList.toggle('active', k === name);
+    tabViews[k].style.display = (k === name) ? '' : 'none';
+  });
+  // 거리 필터는 주사위/사다리에서만 의미가 있음
+  document.getElementById('distanceFilterRow').style.display = (name === 'vote') ? 'none' : 'flex';
+  if(name === 'ladder') drawLadder();
+  if(name === 'vote') renderVoteCandidates();
+}
+tabButtons.dice.addEventListener('click', () => switchTab('dice'));
+tabButtons.ladder.addEventListener('click', () => switchTab('ladder'));
+tabButtons.vote.addEventListener('click', () => switchTab('vote'));
+
+document.getElementById('distanceFilterChk').addEventListener('change', () => {
+  if(document.getElementById('ladderView').style.display !== 'none') drawLadder();
+});
+document.getElementById('distanceFilterMin').addEventListener('change', () => {
+  if(document.getElementById('ladderView').style.display !== 'none') drawLadder();
+});
+
+// ---- 사다리타기 ----
+let ladderData = null;
+
+function drawLadder(){
+  if(places.length < 2){
+    document.getElementById('ladderSvg').innerHTML = '';
+    document.getElementById('ladderResult').textContent = '사다리타기는 단골집이 2곳 이상일 때 가능해요!';
+    return;
+  }
+  const { pool, excludedCount, fallback } = getEligiblePlaces();
+  if(pool.length < 2){
+    document.getElementById('ladderSvg').innerHTML = '';
+    document.getElementById('ladderResult').textContent = `조건(최근 방문/거리)을 만족하는 곳이 2곳 미만이라 사다리를 만들 수 없어요!`;
+    return;
+  }
+  const n = Math.min(pool.length, 8); // 최대 8개까지 표시
+  const chosen = [...pool].sort(() => Math.random()-0.5).slice(0, n);
+  const ladderNote = fallback
+    ? '조건에 맞는 곳이 없어 전체에서 추첨했어요'
+    : (excludedCount > 0 ? `최근 방문/거리 조건으로 ${excludedCount}곳은 제외됐어요` : '');
+  const colW = 70;
+  const width = colW * n;
+  const height = 280;
+  const svg = document.getElementById('ladderSvg');
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.innerHTML = '';
+
+  // rungs (가로줄) 랜덤 생성: 각 row마다 인접 컬럼 중 일부 연결
+  const rows = 7;
+  const rungs = []; // {row, col} col connects col,col+1
+  for(let r=1;r<rows;r++){
+    let lastCol = -2;
+    for(let c=0;c<n-1;c++){
+      if(c <= lastCol+1) continue;
+      if(Math.random() < 0.45){
+        rungs.push({row:r, col:c});
+        lastCol = c;
+      }
+    }
+  }
+
+  // draw verticals
+  for(let c=0;c<n;c++){
+    const x = colW/2 + c*colW;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x); line.setAttribute('y1',20);
+    line.setAttribute('x2',x); line.setAttribute('y2',height-40);
+    line.setAttribute('stroke','#2c4364'); line.setAttribute('stroke-width','3');
+    svg.appendChild(line);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x',x); label.setAttribute('y',14);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('fill','#f2b705');
+    label.setAttribute('font-size','11');
+    label.setAttribute('font-family','Space Mono, monospace');
+    label.textContent = c+1;
+    svg.appendChild(label);
+
+    const nameLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+    nameLabel.setAttribute('x',x); nameLabel.setAttribute('y',height-20);
+    nameLabel.setAttribute('text-anchor','middle');
+    nameLabel.setAttribute('fill','#f4ecd8');
+    nameLabel.setAttribute('font-size','10');
+    nameLabel.setAttribute('font-family','Gowun Dodum, sans-serif');
+    const nm = chosen[c].name.length > 6 ? chosen[c].name.slice(0,5)+'…' : chosen[c].name;
+    nameLabel.textContent = nm;
+    svg.appendChild(nameLabel);
+  }
+
+  const rowH = (height-60)/rows;
+  rungs.forEach(({row,col}) => {
+    const x1 = colW/2 + col*colW;
+    const x2 = colW/2 + (col+1)*colW;
+    const y = 20 + row*rowH;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y);
+    line.setAttribute('stroke','#e8472a'); line.setAttribute('stroke-width','3');
+    svg.appendChild(line);
+  });
+
+  // marker dot for animation
+  const marker = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  marker.setAttribute('r',7);
+  marker.setAttribute('fill','#f2b705');
+  marker.setAttribute('id','ladderMarker');
+  marker.setAttribute('cx', colW/2);
+  marker.setAttribute('cy', 20);
+  svg.appendChild(marker);
+
+  ladderData = {n, chosen, rungs, colW, rowH, height};
+  document.getElementById('ladderResult').textContent = ladderNote;
+  renderDirectionsButton('ladderDirections', null);
+  document.getElementById('ladderResult').style.fontSize = ladderNote ? '12px' : '';
+  document.getElementById('ladderResult').style.color = ladderNote ? '#9fb2cc' : '';
+  document.getElementById('ladderResult').style.fontFamily = ladderNote ? "'Space Mono', monospace" : '';
+}
+
+document.getElementById('runLadderBtn').addEventListener('click', () => {
+  if(!ladderData || places.length < 2){ drawLadder(); if(!ladderData) return; }
+  const {n, chosen, rungs, colW, rowH, height} = ladderData;
+  const startCol = Math.floor(Math.random()*n);
+  let col = startCol;
+  let y = 20;
+  const path = [{col, y}];
+  for(let row=1; row<7; row++){
+    y = 20 + row*rowH;
+    const rungHere = rungs.find(r => r.row===row && (r.col===col || r.col===col-1));
+    if(rungHere){
+      col = rungHere.col === col ? col+1 : col-1;
+    }
+    path.push({col, y});
+  }
+  path.push({col, y: height-40});
+
+  const marker = document.getElementById('ladderMarker');
+  let step = 0;
+  const resultEl = document.getElementById('ladderResult');
+  resultEl.style.fontSize = '';
+  resultEl.style.color = '';
+  resultEl.style.fontFamily = '';
+  resultEl.textContent = '내려가는 중...';
+  renderDirectionsButton('ladderDirections', null);
+
+  function animateStep(){
+    if(step >= path.length){
+      const winner = chosen[col];
+      resultEl.textContent = `🎉 오늘의 점심: ${winner.name}`;
+      renderDirectionsButton('ladderDirections', winner);
+      return;
+    }
+    const p = path[step];
+    marker.setAttribute('cx', colW/2 + p.col*colW);
+    marker.setAttribute('cy', p.y);
+    step++;
+    setTimeout(animateStep, 220);
+  }
+  animateStep();
+});
+
+// ---- 투표 모드 ----
+let voteState = null; // { candidates: [{id, name, votes}] }
+
+function renderVoteCandidates(){
+  const wrap = document.getElementById('voteCandidates');
+  if(!wrap) return;
+  // 투표가 진행 중이면 후보 선택 화면을 건드리지 않음
+  if(document.getElementById('voteBoardWrap').style.display !== 'none') return;
+  if(places.length === 0){
+    wrap.innerHTML = '<div class="empty">먼저 단골집을 등록해주세요.</div>';
+    return;
+  }
+  const { pool } = getEligiblePlaces();
+  const preselected = new Set(pool.slice(0, Math.min(5, pool.length)).map(p => p.id));
+  wrap.innerHTML = places.map(p => `
+    <label class="vote-check">
+      <input type="checkbox" value="${p.id}" ${preselected.has(p.id) ? 'checked' : ''}>
+      ${escapeHtml(p.name)}
+    </label>
+  `).join('');
+}
+
+document.getElementById('startVoteBtn').addEventListener('click', () => {
+  const checked = Array.from(document.querySelectorAll('#voteCandidates input:checked')).map(i => i.value);
+  if(checked.length < 2){
+    alert('투표 후보를 2곳 이상 선택해주세요!');
+    return;
+  }
+  voteState = {
+    candidates: checked.map(id => {
+      const p = places.find(pl => pl.id === id);
+      return { id, name: p ? p.name : '(삭제됨)', votes: 0 };
+    })
+  };
+  document.getElementById('voteSetup').style.display = 'none';
+  document.getElementById('voteBoardWrap').style.display = '';
+  document.getElementById('voteResult').textContent = '';
+  renderDirectionsButton('voteDirections', null);
+  renderVoteBoard();
+});
+
+function renderVoteBoard(){
+  const boardEl = document.getElementById('voteBoard');
+  if(!voteState) return;
+  const maxVotes = Math.max(1, ...voteState.candidates.map(c => c.votes));
+  boardEl.innerHTML = voteState.candidates.map(c => `
+    <div class="vote-item" data-id="${c.id}">
+      <div class="vname">${escapeHtml(c.name)}</div>
+      <div class="vbar"><div class="vbar-fill" style="width:${(c.votes/maxVotes*100)}%"></div></div>
+      <div class="vcount">${c.votes}표</div>
+      <button class="btn-primary" data-vote-id="${c.id}" style="padding:6px 12px;font-size:12px;">+1 투표</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('voteBoard').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-vote-id]');
+  if(!btn || !voteState) return;
+  const c = voteState.candidates.find(c => c.id === btn.dataset.voteId);
+  if(c){ c.votes++; renderVoteBoard(); }
+});
+
+document.getElementById('endVoteBtn').addEventListener('click', () => {
+  if(!voteState) return;
+  const maxVotes = Math.max(...voteState.candidates.map(c => c.votes));
+  if(maxVotes === 0){
+    document.getElementById('voteResult').textContent = '아직 투표가 없어요. 한 표씩 눌러주세요!';
+    return;
+  }
+  const winners = voteState.candidates.filter(c => c.votes === maxVotes);
+  const winner = winners[Math.floor(Math.random() * winners.length)];
+  document.getElementById('voteResult').textContent = winners.length > 1
+    ? `🎉 동률 추첨 당첨: ${winner.name} (${maxVotes}표)`
+    : `🎉 오늘의 점심: ${winner.name} (${maxVotes}표)`;
+  renderDirectionsButton('voteDirections', winner);
+});
+
+document.getElementById('resetVoteBtn').addEventListener('click', () => {
+  voteState = null;
+  document.getElementById('voteSetup').style.display = '';
+  document.getElementById('voteBoardWrap').style.display = 'none';
+  renderDirectionsButton('voteDirections', null);
+  renderVoteCandidates();
+});
+
+load();
+</script>
+</body>
+</html>
