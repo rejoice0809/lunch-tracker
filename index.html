@@ -209,42 +209,64 @@
   .ladder-wrap{overflow-x:auto;padding:10px 0;}
   .ladder-svg{display:block;margin:0 auto;}
 
-  /* 룰렛 */
-  .roulette-stage{text-align:center;padding:10px;}
+  /* 룰렛 (3D 틸트) */
+  .roulette-stage{text-align:center;padding:30px 10px 10px;}
   .roulette-wrap{
     position:relative;
     width:300px;height:300px;
-    margin:0 auto 6px;
+    margin:0 auto 26px;
+  }
+  .roulette-wrap::after{
+    content:"";
+    position:absolute;
+    left:8%;right:8%;bottom:-22px;
+    height:30px;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0.55), transparent 70%);
+    z-index:-1;
   }
   .roulette-wrap canvas{
     width:100%;height:100%;
     border-radius:50%;
     box-shadow:0 6px 0 #0b1626, 0 0 0 6px var(--navy2), 0 0 0 9px var(--mustard);
+    transform:perspective(900px) rotateX(52deg) rotateZ(0deg);
+    transform-origin:center center;
     transition:transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  }
+  .roulette-hub{
+    position:absolute;
+    top:50%;left:50%;
+    width:34px;height:34px;
+    margin:-15px 0 0 -17px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff6d8, var(--mustard) 60%, #b8860a 100%);
+    box-shadow:0 3px 4px rgba(0,0,0,0.5);
+    transform:perspective(900px) rotateX(52deg);
+    z-index:2;
   }
   .roulette-pointer{
     position:absolute;
-    top:-8px;
+    top:-22px;
     left:50%;
     transform:translateX(-50%);
     font-size:34px;
     color:var(--mustard);
     text-shadow:0 2px 0 #0b1626;
-    z-index:2;
+    z-index:3;
     pointer-events:none;
   }
 
-  /* 슬롯머신 */
+  /* 슬롯머신 (3D 드럼) */
   .slot-stage{text-align:center;padding:10px;}
   .slot-window{
     width:260px;
     height:180px;
     margin:0 auto 18px;
     overflow:hidden;
-    background:var(--cream);
+    background:linear-gradient(180deg, #d8cfb4, var(--cream) 35%, var(--cream) 65%, #d8cfb4);
     border-radius:14px;
-    box-shadow:0 6px 0 #b89c4a, inset 0 0 0 6px var(--navy2);
+    box-shadow:0 6px 0 #b89c4a, inset 0 0 0 6px var(--navy2), inset 0 18px 22px -10px rgba(0,0,0,0.45), inset 0 -18px 22px -10px rgba(0,0,0,0.45);
     position:relative;
+    perspective:700px;
   }
   .slot-window::before{
     content:"";
@@ -255,14 +277,19 @@
     border-top:2px dashed var(--brick);
     border-bottom:2px dashed var(--brick);
     pointer-events:none;
+    z-index:3;
   }
   .slot-reel{
-    display:flex;
-    flex-direction:column;
+    position:relative;
+    width:100%;height:100%;
+    transform-style:preserve-3d;
     transition:transform 3.5s cubic-bezier(0.1, 0.7, 0.15, 1);
   }
   .slot-item{
+    position:absolute;
+    top:50%;left:0;right:0;
     height:60px;
+    margin-top:-30px;
     display:flex;align-items:center;justify-content:center;
     font-family:'Black Han Sans',sans-serif;
     font-size:18px;
@@ -270,6 +297,7 @@
     padding:0 10px;
     text-align:center;
     box-sizing:border-box;
+    backface-visibility:hidden;
   }
 
   .stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
@@ -628,6 +656,7 @@
       <div class="roulette-stage">
         <div class="roulette-wrap" id="rouletteWrap">
           <canvas id="rouletteCanvas" width="300" height="300"></canvas>
+          <div class="roulette-hub"></div>
           <div class="roulette-pointer">▼</div>
         </div>
         <button class="btn-primary" id="spinRouletteBtn">룰렛 돌리기</button>
@@ -1665,6 +1694,11 @@ document.getElementById('distanceFilterMin').addEventListener('change', () => {
 
 // ---- 룰렛 ----
 const ROULETTE_COLORS = ['#f2b705', '#e8472a', '#16273f', '#9fb2cc', '#b89c4a', '#5a2a22'];
+const ROULETTE_TILT = 52;
+const ROULETTE_PERSPECTIVE = 900;
+function rouletteTransform(deg){
+  return `perspective(${ROULETTE_PERSPECTIVE}px) rotateX(${ROULETTE_TILT}deg) rotateZ(${deg}deg)`;
+}
 let rouletteSegments = null; // [{place, start, end}]
 let rouletteRotation = 0;
 let rouletteSpinning = false;
@@ -1754,7 +1788,7 @@ document.getElementById('spinRouletteBtn').addEventListener('click', () => {
   rouletteRotation = targetRotation;
 
   const wrap = document.getElementById('rouletteWrap');
-  wrap.querySelector('canvas').style.transform = `rotate(${rouletteRotation}deg)`;
+  wrap.querySelector('canvas').style.transform = rouletteTransform(rouletteRotation);
 
   setTimeout(() => {
     rouletteSpinning = false;
@@ -1767,22 +1801,38 @@ document.getElementById('spinRouletteBtn').addEventListener('click', () => {
   }, 4050);
 });
 
-// ---- 슬롯머신 ----
+// ---- 슬롯머신 (3D 드럼) ----
 let slotSpinning = false;
-let slotOffset = 0;
+let slotRotation = 0;
+const SLOT_REEL_LEN = 24; // 드럼 한 바퀴를 이루는 칸 수
+const SLOT_ITEM_H = 60;
+const SLOT_ANGLE = 360 / SLOT_REEL_LEN; // 칸 사이 각도
+const SLOT_RADIUS = (SLOT_ITEM_H / 2) / Math.tan((SLOT_ANGLE * Math.PI / 180) / 2); // 원기둥 반지름
+
+function buildSlotDrum(items){
+  const reel = document.getElementById('slotReel');
+  reel.innerHTML = items.map((p, i) => `
+    <div class="slot-item" style="transform:rotateX(${i*SLOT_ANGLE}deg) translateZ(${SLOT_RADIUS}px);">
+      ${escapeHtml(p.name)}
+    </div>
+  `).join('');
+}
 
 function resetSlot(){
   document.getElementById('slotResult').textContent = '';
   document.getElementById('slotSub').textContent = '';
   renderDirectionsButton('slotDirections', null);
   const reel = document.getElementById('slotReel');
-  reel.style.transition = 'none';
-  reel.style.transform = 'translateY(0)';
-  slotOffset = 0;
   const { pool } = getEligiblePlaces();
-  reel.innerHTML = pool.length
-    ? pool.slice(0,1).map(p => `<div class="slot-item">${escapeHtml(p.name)}</div>`).join('')
-    : '<div class="slot-item">단골집을 등록해주세요</div>';
+  if(pool.length === 0){
+    reel.innerHTML = '<div class="slot-item" style="transform:translateZ(0);">단골집을 등록해주세요</div>';
+    return;
+  }
+  // 0번 칸(정면)에 미리보기로 하나, 나머지 칸은 무작위로 채워서 드럼 형태를 보여줌
+  const filler = Array.from({length: SLOT_REEL_LEN}, () => pool[Math.floor(Math.random()*pool.length)]);
+  buildSlotDrum(filler);
+  reel.style.transition = 'none';
+  reel.style.transform = `rotateX(${slotRotation}deg)`;
 }
 
 document.getElementById('spinSlotBtn').addEventListener('click', () => {
@@ -1798,24 +1848,27 @@ document.getElementById('spinSlotBtn').addEventListener('click', () => {
   renderDirectionsButton('slotDirections', null);
 
   const picked = weightedPick(pool);
-  const ITEM_H = 60;
-  const REEL_LEN = 24; // 마지막 칸이 당첨 칸
-  const reelItems = [];
-  for(let i=0;i<REEL_LEN-1;i++){
+
+  // 0번 칸을 항상 당첨 칸으로 두고, 나머지 칸은 무작위로 채움
+  const reelItems = [picked];
+  for(let i=1;i<SLOT_REEL_LEN;i++){
     reelItems.push(pool[Math.floor(Math.random()*pool.length)]);
   }
-  reelItems.push(picked);
 
   const reel = document.getElementById('slotReel');
   reel.style.transition = 'none';
-  reel.style.transform = 'translateY(0)';
-  reel.innerHTML = reelItems.map(p => `<div class="slot-item">${escapeHtml(p.name)}</div>`).join('');
+  reel.style.transform = `rotateX(${slotRotation}deg)`;
+  buildSlotDrum(reelItems);
 
-  // 강제 리플로우 후 애니메이션 시작 (창 가운데 줄에 당첨 칸이 오도록)
+  // 강제 리플로우 후 애니메이션 시작
   void reel.offsetHeight;
-  const targetY = -(((REEL_LEN-1) * ITEM_H) - ITEM_H); // 윈도우 높이 180 = 3칸, 가운데 줄에 위치
+
+  // 0번 칸(당첨)이 정면(각도 0, 즉 회전값이 360의 배수)에 오도록 회전
+  const extraSpins = 4 + Math.floor(Math.random()*3); // 4~6바퀴
+  const targetRotation = slotRotation - (slotRotation % 360) - extraSpins*360;
+  slotRotation = targetRotation;
   reel.style.transition = '';
-  reel.style.transform = `translateY(${targetY}px)`;
+  reel.style.transform = `rotateX(${slotRotation}deg)`;
 
   setTimeout(() => {
     slotSpinning = false;
