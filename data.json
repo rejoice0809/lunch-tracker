@@ -1,0 +1,126 @@
+[
+  {
+    "id": "p_0fwz8kz",
+    "name": "명장짬뽕",
+    "category": "중식",
+    "memo": "하얀짬뽕, 크림짬뽕",
+    "distance": 2,
+    "visits": [
+      {
+        "date": "2026-06-30T03:41:32.735Z",
+        "rating": 5
+      }
+    ],
+    "lat": 37.5544606,
+    "lng": 127.0782438,
+    "address": "서울특별시 광진구 능동로 276"
+  },
+  {
+    "id": "p_9rmko7c",
+    "name": "청화옥",
+    "category": "한식",
+    "memo": "순대국밥",
+    "distance": 6,
+    "visits": [
+      {
+        "date": "2026-06-26T03:00:00.000Z",
+        "rating": 5
+      }
+    ],
+    "lat": 37.55444,
+    "lng": 127.08156,
+    "address": "서울특별시 광진구 능동 265-10"
+  },
+  {
+    "id": "p_6wixagj",
+    "name": "솥뚜껑삼겹살",
+    "category": "한식",
+    "memo": "김치찌개, 삼겹살",
+    "distance": 2,
+    "visits": [
+      {
+        "date": "2026-06-29T03:00:00.000Z",
+        "rating": 4
+      }
+    ],
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 300"
+  },
+  {
+    "id": "p_1pbuq1v",
+    "name": "육전국밥",
+    "category": "한식",
+    "memo": "소고기국밥",
+    "distance": 1,
+    "visits": [
+      {
+        "date": "2026-06-25T03:00:00.000Z",
+        "rating": 4
+      }
+    ],
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 294"
+  },
+  {
+    "id": "p_ae5az4t",
+    "name": "군자돈까스",
+    "category": "양식",
+    "memo": "돈까스",
+    "distance": 5,
+    "visits": [],
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 천호대로112길 17"
+  },
+  {
+    "id": "p_zalma2f",
+    "name": "유가네닭갈비",
+    "category": "한식",
+    "memo": "닭갈비, 볶음밥",
+    "distance": 5,
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로36길 21",
+    "visits": [
+      {
+        "date": "2026-06-23T03:00:00.000Z",
+        "rating": 4
+      }
+    ]
+  },
+  {
+    "id": "p_svxx4pv",
+    "name": "소사면옥",
+    "category": "한식",
+    "memo": "국수, 만두국",
+    "distance": 2,
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 270",
+    "visits": []
+  },
+  {
+    "id": "p_eprpb40",
+    "name": "계탉닭",
+    "category": "한식",
+    "memo": "닭계장",
+    "distance": 4,
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 271-1",
+    "visits": []
+  },
+  {
+    "id": "p_yqri7ec",
+    "name": "서울해장",
+    "category": "한식",
+    "memo": "닭곰탕, 육회비빔밥",
+    "distance": 2,
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 285",
+    "visits": []
+  }
+]
