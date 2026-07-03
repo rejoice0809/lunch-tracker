@@ -138,5 +138,21 @@
         "rating": 5
       }
     ]
+  },
+  {
+    "id": "p_pdjwgit",
+    "name": "김뚜껑부대찌개",
+    "category": "한식",
+    "memo": "부대찌개 9500원",
+    "distance": 6,
+    "lat": null,
+    "lng": null,
+    "address": null,
+    "visits": [
+      {
+        "date": "2026-07-02T03:10:57.127Z",
+        "rating": 4
+      }
+    ]
   }
 ]
