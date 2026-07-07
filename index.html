@@ -1119,9 +1119,9 @@ document.getElementById('reloadDataBtn').addEventListener('click', async () => {
   }
 });
 
-// ---- 최신버전 강제 확인: 캐시/서비스워커를 모두 지우고 새로고침 ----
+// ---- 최신버전 강제 확인: 캐시/서비스워커를 지우고, data.json도 새로 불러온 뒤 새로고침 ----
 document.getElementById('forceUpdateBtn').addEventListener('click', async () => {
-  if(!confirm('캐시를 지우고 최신 버전을 다시 불러올까요?\n(등록된 단골집 데이터는 그대로 유지돼요)')) return;
+  if(!confirm('캐시를 지우고 최신 버전(파일+데이터)을 다시 불러올까요?\n다음 화면에서 데이터를 합칠지/덮어쓸지 고를 수 있어요.')) return;
   try{
     if('caches' in window){
       const keys = await caches.keys();
@@ -1133,9 +1133,18 @@ document.getElementById('forceUpdateBtn').addEventListener('click', async () => 
     }
   }catch(e){
     console.error('캐시/서비스워커 정리 실패', e);
-  }finally{
-    location.reload();
   }
+
+  try{
+    const res = await fetch('./data.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('not found');
+    const seeded = await res.json();
+    await applyImportedPlaces(seeded);
+  }catch(e){
+    alert('data.json을 새로 불러오지 못했어요. 캐시/서비스워커는 정리됐으니 새로고침만 진행할게요.');
+  }
+
+  location.reload();
 });
 
 async function applyImportedPlaces(imported){
