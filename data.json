@@ -13,7 +13,8 @@
     ],
     "lat": 37.5544606,
     "lng": 127.0782438,
-    "address": "서울특별시 광진구 능동로 276"
+    "address": "서울특별시 광진구 능동로 276",
+    "station": "군자역"
   },
   {
     "id": "p_9rmko7c",
@@ -29,7 +30,8 @@
     ],
     "lat": 37.55444,
     "lng": 127.08156,
-    "address": "서울특별시 광진구 능동 265-10"
+    "address": "서울특별시 광진구 능동 265-10",
+    "station": "군자역"
   },
   {
     "id": "p_6wixagj",
@@ -45,7 +47,8 @@
     ],
     "lat": null,
     "lng": null,
-    "address": "서울특별시 광진구 능동로 300"
+    "address": "서울특별시 광진구 능동로 300",
+    "station": "군자역"
   },
   {
     "id": "p_1pbuq1v",
@@ -65,7 +68,8 @@
     ],
     "lat": null,
     "lng": null,
-    "address": "서울특별시 광진구 능동로 294"
+    "address": "서울특별시 광진구 능동로 294",
+    "station": "군자역"
   },
   {
     "id": "p_ae5az4t",
@@ -76,7 +80,8 @@
     "visits": [],
     "lat": null,
     "lng": null,
-    "address": "서울특별시 광진구 천호대로112길 17"
+    "address": "서울특별시 광진구 천호대로112길 17",
+    "station": "군자역"
   },
   {
     "id": "p_zalma2f",
@@ -92,7 +97,8 @@
         "date": "2026-06-23T03:00:00.000Z",
         "rating": 4
       }
-    ]
+    ],
+    "station": "군자역"
   },
   {
     "id": "p_svxx4pv",
@@ -103,7 +109,8 @@
     "lat": null,
     "lng": null,
     "address": "서울특별시 광진구 능동로 270",
-    "visits": []
+    "visits": [],
+    "station": "군자역"
   },
   {
     "id": "p_eprpb40",
@@ -114,7 +121,8 @@
     "lat": null,
     "lng": null,
     "address": "서울특별시 광진구 능동로 271-1",
-    "visits": []
+    "visits": [],
+    "station": "군자역"
   },
   {
     "id": "p_yqri7ec",
@@ -125,7 +133,8 @@
     "lat": null,
     "lng": null,
     "address": "서울특별시 광진구 능동로 285",
-    "visits": []
+    "visits": [],
+    "station": "군자역"
   },
   {
     "id": "p_fs2tb1e",
@@ -141,7 +150,8 @@
         "date": "2026-07-01T03:12:35.747Z",
         "rating": 5
       }
-    ]
+    ],
+    "station": "군자역"
   },
   {
     "id": "p_pdjwgit",
@@ -157,7 +167,8 @@
         "date": "2026-07-02T03:10:57.127Z",
         "rating": 4
       }
-    ]
+    ],
+    "station": "군자역"
   },
   {
     "id": "p_6k59ke6",
@@ -173,6 +184,7 @@
         "date": "2026-07-03T03:08:36.128Z",
         "rating": 4
       }
-    ]
+    ],
+    "station": "군자역"
   }
 ]

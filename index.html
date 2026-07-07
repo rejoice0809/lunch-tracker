@@ -85,6 +85,33 @@
   .ticket-edge::before{left:-11px;}
   .ticket-edge::after{right:-11px;}
 
+  .station-toggle{
+    display:flex;
+    gap:6px;
+    background:var(--navy2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:5px;
+    margin-bottom:20px;
+  }
+  .station-toggle button{
+    flex:1;
+    background:transparent;
+    color:#9fb2cc;
+    border:none;
+    border-radius:8px;
+    padding:10px 8px;
+    font-size:13px;
+    font-family:'Gowun Dodum',sans-serif;
+    font-weight:bold;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .station-toggle button.active{
+    background:var(--mustard);
+    color:var(--navy);
+  }
+
   .section-title{
     font-family:'Black Han Sans',sans-serif;
     color:var(--mustard);
@@ -573,6 +600,12 @@
     <h1>오늘 뭐 먹지?</h1>
   </header>
 
+  <div class="station-toggle" id="stationToggle">
+    <button data-station="all" class="active">전체</button>
+    <button data-station="군자역">🚉 군자역</button>
+    <button data-station="중곡역">🚉 중곡역</button>
+  </div>
+
   <div class="ticket-edge">
     <div class="section-title"><span class="num">01</span> 단골집 등록</div>
     <form class="add-form" id="addForm">
@@ -590,6 +623,11 @@
       <input name="memo" placeholder="메모 (예: 점심특선 9천원)">
       <input name="distance" type="number" min="0" placeholder="도보(분)">
       <input name="address" placeholder="도로명 주소 (선택)">
+      <select name="station">
+        <option value="공통">공통(둘 다)</option>
+        <option value="군자역">🚉 군자역</option>
+        <option value="중곡역">🚉 중곡역</option>
+      </select>
       <button type="submit" class="btn-primary">+ 추가</button>
     </form>
   </div>
@@ -780,6 +818,13 @@
       <label>도로명 주소
         <input name="address" placeholder="예: 서울 강남구 테헤란로 123">
       </label>
+      <label>역 구분
+        <select name="station">
+          <option value="공통">공통(둘 다)</option>
+          <option value="군자역">🚉 군자역</option>
+          <option value="중곡역">🚉 중곡역</option>
+        </select>
+      </label>
       <p class="edit-hint">주소를 바꾸면 길찾기용 좌표는 다음 길찾기 때 새로 계산돼요</p>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" id="cancelEditBtn">취소</button>
@@ -791,8 +836,53 @@
 
 <script>
 const STORE_KEY = 'lunch_places';
+const STATION_KEY = 'lunch_station_filter';
 let places = [];
 const hasCloudStorage = (typeof window.storage !== 'undefined' && window.storage !== null);
+
+// ---- 역 구분 토글 (군자역 / 중곡역 / 전체) ----
+let currentStation = 'all';
+try{
+  const savedStation = localStorage.getItem(STATION_KEY);
+  if(savedStation === '군자역' || savedStation === '중곡역' || savedStation === 'all'){
+    currentStation = savedStation;
+  }
+}catch(e){ /* localStorage 접근 불가 시 기본값(all) 사용 */ }
+
+// station이 '공통'이거나 비어있는 곳은 두 역 어디서든 보이도록 처리
+function visiblePlaces(){
+  if(currentStation === 'all') return places;
+  return places.filter(p => !p.station || p.station === '공통' || p.station === currentStation);
+}
+
+function setStationToggleUI(){
+  document.querySelectorAll('#stationToggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.station === currentStation);
+  });
+  // 등록 폼의 기본 역 선택값도 현재 토글에 맞춤
+  const addStationSelect = document.querySelector('#addForm select[name=station]');
+  if(addStationSelect){
+    addStationSelect.value = (currentStation === '군자역' || currentStation === '중곡역') ? currentStation : '공통';
+  }
+}
+
+document.getElementById('stationToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-station]');
+  if(!btn) return;
+  currentStation = btn.dataset.station;
+  try{ localStorage.setItem(STATION_KEY, currentStation); }catch(e){ /* 무시 */ }
+  setStationToggleUI();
+  render();
+  // 현재 열려있는 추첨 화면이 있다면 새 필터로 다시 그려줌
+  if(document.getElementById('rouletteView').style.display !== 'none') resetRoulette();
+  if(document.getElementById('slotView').style.display !== 'none') resetSlot();
+  if(document.getElementById('ladderView').style.display !== 'none') drawLadder();
+  if(document.getElementById('diceView').style.display !== 'none'){
+    document.getElementById('diceResult').textContent = '';
+    document.getElementById('diceSub').textContent = '';
+    renderDirectionsButton('diceDirections', null);
+  }
+});
 
 function uid(){ return 'p_' + Math.random().toString(36).slice(2,9); }
 
@@ -856,11 +946,13 @@ async function load(){
     if(p.lat === undefined){ p.lat = null; migrated = true; }
     if(p.lng === undefined){ p.lng = null; migrated = true; }
     if(p.address === undefined){ p.address = null; migrated = true; }
+    if(p.station === undefined){ p.station = '공통'; migrated = true; }
     p.visits = (p.visits || []).map(v => {
       if(typeof v === 'string'){ migrated = true; return { date: v, rating: null }; }
       return v;
     });
   });
+  setStationToggleUI();
   render();
   if(migrated) save();
 }
@@ -904,7 +996,7 @@ function starsText(avg){
 let currentSort = 'default';
 
 function sortedPlaces(){
-  const arr = [...places];
+  const arr = [...visiblePlaces()];
   switch(currentSort){
     case 'distance':
       return arr.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
@@ -927,9 +1019,13 @@ function sortedPlaces(){
 
 function render(){
   const list = document.getElementById('placeList');
-  document.getElementById('countTag').textContent = places.length ? `${places.length}곳` : '';
-  if(places.length === 0){
-    list.innerHTML = '<div class="empty">아직 등록된 단골집이 없어요.<br>위에서 첫 가게를 추가해보세요 🍜</div>';
+  const visible = visiblePlaces();
+  document.getElementById('countTag').textContent = visible.length ? `${visible.length}곳` : '';
+  if(visible.length === 0){
+    const msg = places.length === 0
+      ? '아직 등록된 단골집이 없어요.<br>위에서 첫 가게를 추가해보세요 🍜'
+      : `${currentStation} 근처에 등록된 단골집이 없어요.<br>전체보기로 바꾸거나 새로 등록해보세요 🍜`;
+    list.innerHTML = `<div class="empty">${msg}</div>`;
     renderStats();
     renderVoteCandidates();
     return;
@@ -944,6 +1040,7 @@ function render(){
         <div class="name">${escapeHtml(p.name)} <span class="tag">${escapeHtml(p.category)}</span></div>
         <div class="meta">방문 ${p.visits.length}회 · 최근: ${fmtDate(lv)}</div>
         <div class="chip-row">
+          ${p.station && p.station !== '공통' ? `<span class="chip">🚉 ${escapeHtml(p.station)}</span>` : ''}
           ${p.distance != null ? `<span class="chip">🚶 도보 ${p.distance}분</span>` : ''}
           ${avg !== null ? `<span class="chip stars">${starsText(avg)}</span>` : ''}
           ${p.address ? `<span class="chip">📍 ${escapeHtml(p.address)}</span>` : ''}
@@ -1036,6 +1133,7 @@ async function applyImportedPlaces(imported){
     if(p.distance === undefined) p.distance = null;
     if(p.lat === undefined) p.lat = null;
     if(p.lng === undefined) p.lng = null;
+    if(p.station === undefined) p.station = '공통';
     if(p.address === undefined) p.address = null;
     p.visits = (p.visits || []).map(v => typeof v === 'string' ? { date: v, rating: null } : v);
   });
@@ -1083,9 +1181,13 @@ function renderStats(){
   const staleRankEl = document.getElementById('staleRanking');
   const ratingRankEl = document.getElementById('ratingRanking');
   const distanceRankEl = document.getElementById('distanceRanking');
+  const places = visiblePlaces();
 
   if(places.length === 0){
-    cardsEl.innerHTML = '<div class="empty">아직 통계를 보여줄 데이터가 없어요.</div>';
+    const emptyMsg = currentStation === 'all'
+      ? '아직 통계를 보여줄 데이터가 없어요.'
+      : `${currentStation}에 등록된 단골집이 없어요.`;
+    cardsEl.innerHTML = `<div class="empty">${emptyMsg}</div>`;
     catEl.innerHTML = '';
     visitRankEl.innerHTML = '';
     staleRankEl.innerHTML = '';
@@ -1207,6 +1309,7 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
   const distanceRaw = fd.get('distance');
   const distance = distanceRaw && distanceRaw.trim() !== '' ? Number(distanceRaw) : null;
   const address = fd.get('address').trim() || null;
+  const station = fd.get('station') || '공통';
   places.push({
     id: uid(),
     name,
@@ -1216,9 +1319,11 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
     lat: null,
     lng: null,
     address,
+    station,
     visits: []
   });
   e.target.reset();
+  setStationToggleUI(); // 폼 리셋 시 역 선택도 현재 토글 기본값으로 복원
   render();
   await save();
 });
@@ -1261,6 +1366,7 @@ function openEditModal(placeId){
   form.elements['memo'].value = place.memo || '';
   form.elements['distance'].value = place.distance != null ? place.distance : '';
   form.elements['address'].value = place.address || '';
+  form.elements['station'].value = place.station || '공통';
   document.getElementById('editModal').style.display = 'flex';
 }
 
@@ -1285,6 +1391,7 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
   place.category = fd.get('category');
   place.memo = fd.get('memo').trim();
   place.distance = (distance != null && !isNaN(distance)) ? distance : null;
+  place.station = fd.get('station') || '공통';
   if(newAddress !== place.address){
     // 주소가 바뀌면 캐시해둔 좌표는 무효화 (다음 길찾기 때 새로 계산)
     place.lat = null;
@@ -1568,7 +1675,7 @@ function getDistanceFilter(){
 }
 
 function getEligiblePlaces(){
-  let base = places;
+  let base = visiblePlaces();
   const maxDistance = getDistanceFilter();
   let distanceExcluded = 0;
   if(maxDistance != null){
@@ -1618,8 +1725,10 @@ function weightedPick(pool){
 // ---- 주사위 게임 ----
 const diceFaces = ['🍚','🍜','🍱','🍕','🍣','🥪'];
 document.getElementById('rollDiceBtn').addEventListener('click', () => {
-  if(places.length === 0){
-    document.getElementById('diceResult').textContent = '먼저 단골집을 등록해주세요!';
+  if(visiblePlaces().length === 0){
+    document.getElementById('diceResult').textContent = places.length === 0
+      ? '먼저 단골집을 등록해주세요!'
+      : `${currentStation}에 등록된 단골집이 없어요!`;
     return;
   }
   const { pool, excludedCount, fallback } = getEligiblePlaces();
@@ -1889,9 +1998,11 @@ document.getElementById('spinSlotBtn').addEventListener('click', () => {
 let ladderData = null;
 
 function drawLadder(){
-  if(places.length < 2){
+  if(visiblePlaces().length < 2){
     document.getElementById('ladderSvg').innerHTML = '';
-    document.getElementById('ladderResult').textContent = '사다리타기는 단골집이 2곳 이상일 때 가능해요!';
+    document.getElementById('ladderResult').textContent = places.length < 2
+      ? '사다리타기는 단골집이 2곳 이상일 때 가능해요!'
+      : `${currentStation}에 등록된 단골집이 2곳 미만이라 사다리를 만들 수 없어요!`;
     return;
   }
   const { pool, excludedCount, fallback } = getEligiblePlaces();
@@ -1986,7 +2097,7 @@ function drawLadder(){
 }
 
 document.getElementById('runLadderBtn').addEventListener('click', () => {
-  if(!ladderData || places.length < 2){ drawLadder(); if(!ladderData) return; }
+  if(!ladderData || visiblePlaces().length < 2){ drawLadder(); if(!ladderData) return; }
   const {n, chosen, rungs, colW, rowH, height} = ladderData;
   const startCol = Math.floor(Math.random()*n);
   let col = startCol;
@@ -2035,13 +2146,14 @@ function renderVoteCandidates(){
   if(!wrap) return;
   // 투표가 진행 중이면 후보 선택 화면을 건드리지 않음
   if(document.getElementById('voteBoardWrap').style.display !== 'none') return;
-  if(places.length === 0){
+  const stationPlaces = visiblePlaces();
+  if(stationPlaces.length === 0){
     wrap.innerHTML = '<div class="empty">먼저 단골집을 등록해주세요.</div>';
     return;
   }
   const { pool } = getEligiblePlaces();
   const preselected = new Set(pool.slice(0, Math.min(5, pool.length)).map(p => p.id));
-  wrap.innerHTML = places.map(p => `
+  wrap.innerHTML = stationPlaces.map(p => `
     <label class="vote-check">
       <input type="checkbox" value="${p.id}" ${preselected.has(p.id) ? 'checked' : ''}>
       ${escapeHtml(p.name)}
