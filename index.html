@@ -638,6 +638,7 @@
       <button class="btn-ghost" id="exportBtn" type="button">⬆ 내보내기</button>
       <button class="btn-ghost" id="importBtn" type="button">⬇ 가져오기</button>
       <button class="btn-ghost" id="reloadDataBtn" type="button">🔄 기본데이터</button>
+      <button class="btn-ghost" id="forceUpdateBtn" type="button">♻️ 최신버전 확인</button>
       <input type="file" id="importFile" accept="application/json" style="display:none;">
       <span style="font-family:'Space Mono',monospace;font-size:11px;color:#9fb2cc;">정렬</span>
       <select id="sortSelect">
@@ -1115,6 +1116,25 @@ document.getElementById('reloadDataBtn').addEventListener('click', async () => {
     await applyImportedPlaces(seeded);
   }catch(e){
     alert('data.json을 찾을 수 없어요. index.html과 같은 폴더에 data.json을 올렸는지 확인해주세요.');
+  }
+});
+
+// ---- 최신버전 강제 확인: 캐시/서비스워커를 모두 지우고 새로고침 ----
+document.getElementById('forceUpdateBtn').addEventListener('click', async () => {
+  if(!confirm('캐시를 지우고 최신 버전을 다시 불러올까요?\n(등록된 단골집 데이터는 그대로 유지돼요)')) return;
+  try{
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  }catch(e){
+    console.error('캐시/서비스워커 정리 실패', e);
+  }finally{
+    location.reload();
   }
 });
 
