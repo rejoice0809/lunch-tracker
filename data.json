@@ -174,7 +174,7 @@
     "id": "p_6k59ke6",
     "name": "하오츠",
     "category": "중식",
-    "memo": "코스 15,900원",
+    "memo": "코스 15,900원(유산슬,찹쌀탕수육,유린기,칠리새우,미니 짜장 or 짬뽕)",
     "distance": 2,
     "lat": null,
     "lng": null,
@@ -186,5 +186,130 @@
       }
     ],
     "station": "군자역"
+  },
+  {
+    "id": "p_0zhskma",
+    "name": "텐동한",
+    "category": "기타",
+    "memo": "튀김을 밥과 먹는 체험, 맛남",
+    "distance": 8,
+    "lat": 37.56286,
+    "lng": 127.08921,
+    "address": "서울특별시 광진구 중곡동 265-17",
+    "station": "군자역",
+    "visits": [
+      {
+        "date": "2026-07-07T02:58:44.790Z",
+        "rating": 4
+      }
+    ]
+  },
+  {
+    "id": "p_oq818my",
+    "name": "본가전주옥",
+    "category": "한식",
+    "memo": "콩나물국밥(5,500원)",
+    "distance": 5,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 긴고랑로 57 1층",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_8fmf2ty",
+    "name": "예담",
+    "category": "한식",
+    "memo": "제육(8,000원)",
+    "distance": 2,
+    "lat": null,
+    "lng": null,
+    "address": "서울특별시 광진구 능동로 390 1층",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_zajvads",
+    "name": "나들이김밥",
+    "category": "한식",
+    "memo": "김치볶음밥(6,000원), 계한후라이(500원)",
+    "distance": 6,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 용마산로 159-1",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_vcuqwid",
+    "name": "돌산보리밥김밥",
+    "category": "한식",
+    "memo": "보리비빔밥(6,000원)",
+    "distance": 8,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 용마산로 156 월드하우스",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_y3mb7pn",
+    "name": "곰곰탕",
+    "category": "한식",
+    "memo": "곰곰탕(8,500원)",
+    "distance": 6,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 용마산로 128 1층 곰곰탕",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_sy68jt7",
+    "name": "민지네감자탕",
+    "category": "한식",
+    "memo": "뼈해장(9,000원)",
+    "distance": 10,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 긴고랑로 89",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_vtytv76",
+    "name": "쌈밥&찌개",
+    "category": "한식",
+    "memo": "간장제육 우렁쌈밥(13,000원)",
+    "distance": 11,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 긴고랑로 99-1 1층 101호",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_gwldo12",
+    "name": "소문난왕족발(신성시장)",
+    "category": "한식",
+    "memo": "순대국(9,000원)",
+    "distance": 19,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 자양로53길 118 소문난왕족발",
+    "station": "중곡역",
+    "visits": []
+  },
+  {
+    "id": "p_y6vywmi",
+    "name": "미니분식(신성시장)",
+    "category": "분식",
+    "memo": "도너츠, 꽈배기(500원), 사라다빵(1000원)",
+    "distance": 19,
+    "lat": null,
+    "lng": null,
+    "address": "서울 광진구 용마산로6길 19",
+    "station": "중곡역",
+    "visits": []
   }
 ]
